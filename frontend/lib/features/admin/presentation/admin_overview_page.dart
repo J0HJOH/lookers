@@ -11,6 +11,7 @@ import '../../orders/domain/order.dart';
 import '../../orders/presentation/status_badge.dart';
 import '../domain/admin_models.dart';
 import 'admin_shell.dart';
+import '../../../core/ui/neu.dart';
 
 class AdminOverviewPage extends StatelessWidget {
   const AdminOverviewPage({super.key});
@@ -99,27 +100,29 @@ class AdminOverviewPage extends StatelessWidget {
               LayoutBuilder(
                 builder: (context, c) {
                   final columns = c.maxWidth < 600 ? 2 : 4;
-                  const gap = 16.0;
+                  const gap = 22.0;
                   final w = (c.maxWidth - gap * (columns - 1)) / columns;
                   return Wrap(
                     spacing: gap,
                     runSpacing: gap,
                     children: [
                       for (final t in tiles)
-                        Container(
+                        SizedBox(
                           width: w,
-                          color: AppColors.surface,
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                t.$1.toUpperCase(),
-                                style: AppText.eyebrow(),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(t.$2, style: AppText.display(40)),
-                            ],
+                          child: NeuBox(
+                            radius: 22,
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  t.$1.toUpperCase(),
+                                  style: AppText.eyebrow(),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(t.$2, style: AppText.display(40)),
+                              ],
+                            ),
                           ),
                         ),
                     ],
@@ -172,7 +175,6 @@ class _Section extends StatelessWidget {
         if (children.isEmpty)
           Text(empty, style: AppText.body(color: AppColors.inkMuted))
         else ...[
-          const Divider(),
           ...children,
         ],
       ],
@@ -191,7 +193,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        InkWell(
+        NeuTapCard(
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -205,7 +207,6 @@ class _Row extends StatelessWidget {
             ),
           ),
         ),
-        const Divider(),
       ],
     );
   }

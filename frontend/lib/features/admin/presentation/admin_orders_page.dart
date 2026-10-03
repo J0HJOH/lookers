@@ -11,6 +11,7 @@ import '../../orders/domain/order.dart';
 import '../../orders/presentation/order_details.dart';
 import '../../orders/presentation/status_badge.dart';
 import 'admin_shell.dart';
+import '../../../core/ui/neu.dart';
 
 class AdminOrdersPage extends StatelessWidget {
   const AdminOrdersPage({super.key});
@@ -32,9 +33,8 @@ class AdminOrdersPage extends StatelessWidget {
                 return const EmptyState(title: 'No orders yet.');
               return Column(
                 children: [
-                  const Divider(),
                   for (final o in orders) ...[
-                    InkWell(
+                    NeuTapCard(
                       onTap: () => context.go('/admin/orders/${o.id}'),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -81,7 +81,6 @@ class AdminOrdersPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Divider(),
                   ],
                 ],
               );
@@ -157,8 +156,9 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    color: AppColors.surface,
+                  NeuBox(
+                    inset: true,
+                    radius: 22,
                     padding: const EdgeInsets.all(20),
                     child: Wrap(
                       spacing: 12,
@@ -183,7 +183,7 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
                             onChanged: (s) => setState(() => _selected = s),
                           ),
                         ),
-                        FilledButton(
+                        NeuButton(
                           onPressed: _busy ? null : () => _save(order),
                           child: Text(_busy ? 'SAVING…' : 'SAVE'),
                         ),

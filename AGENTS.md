@@ -19,7 +19,7 @@ validation at every boundary, hand-written fakes in tests, Definition of Done, h
 ## 1. Project Context
 
 **What it is.** Lookers is an e-commerce website for a clothing brand of the same name, in a
-luxury-editorial style. The **frontend is Flutter (web)**; the backend is **Supabase**. Logo: a
+neumorphic purple style with dark mode. The **frontend is Flutter (web)**; the backend is **Supabase**. Logo: a
 large cursive **L** with a **K** beneath it (`lib/core/ui/logo.dart`).
 
 **Categories:** Men's Clothing, Women's Clothing, Baby's Clothing, Hats, Shoes, Bags & Accessories
@@ -72,7 +72,7 @@ design can be viewed. Sign-in, checkout, account and admin show "not connected" 
 | Database + Auth | **Supabase** (Postgres, RLS, Auth with Google) |
 | Server code | One **Supabase Edge Function** (Deno/TypeScript): `supabase/functions/send-order-confirmation` |
 | Email | **Mailgun** HTTP API, called only from the Edge Function |
-| Fonts | Cormorant Garamond, Jost, Pinyon Script, **bundled** in `frontend/assets/fonts` (SIL OFL licences alongside) |
+| Fonts | Jost and Pinyon Script, **bundled** in `frontend/assets/fonts` (SIL OFL licences alongside) |
 | Images | Free Pexels photos, hotlinked (`images.pexels.com`, CORS-enabled) |
 | Hosting | **Vercel**, static files only. Flutter is built by `scripts/build_web.sh` (locally via `scripts/deploy_vercel.sh`, or in GitHub Actions) and `frontend/build/web` is uploaded. `build_web.sh` writes the `vercel.json` there (SPA rewrite, security headers, no-cache app shell) |
 
@@ -164,7 +164,6 @@ seed/catalog.ts                      # single source of the starter catalogue
 scripts/                             # generate-seed.ts, build_web.sh, serve_web.py
 supabase/                            # migrations/0001_init.sql, seed.sql (generated), functions/send-order-confirmation
 docs/SETUP.md                        # owner directives
-archive/nextjs/                      # superseded Next.js version, kept for reference only
 ```
 
 New features get their own folder with the same three layers. Cross-feature code goes in `core/`
@@ -203,36 +202,58 @@ fakes (`test/helpers.dart`). Never construct a repository or `SupabaseClient` in
 
 ## 7. Design System
 
-**Direction:** luxury editorial, inspired by the owner's Behance reference (*AI Luxury Fashion
-E-Commerce Website Design*). The reference page could not be fetched by the agent (HTTP 403), so the
-look is an interpretation: ivory canvas, near-black ink, antique-gold accent, large serif headlines,
-wide-tracked uppercase labels, generous whitespace, full-bleed photography. 🟡 **HUMAN REVIEW:** the
-owner should compare against the reference and request adjustments.
+**Direction:** **neumorphism ("soft UI") in purple hues, with light and dark modes.** Surfaces share the page
+colour and are lifted (raised) or pressed in (inset) with a light highlight shadow (top-left) and a dark
+shadow (bottom-right). Rounded corners everywhere, Jost typography, a purple primary. The layout pattern
+(announcement strip, prominent search, category rail, product page structure) follows mainstream fast-fashion
+shops; the look is Lookers' own. 🟡 **HUMAN REVIEW:** palette values and final brand look are the owner's call.
 
-All visual values live in `lib/core/theme/`. **No raw colour** (`Color(0x…)`, `Colors.x`) outside that
-folder: `test/design_system_test.dart` fails if one appears. Widgets use `AppColors`, `AppText`,
-`AppSizes`.
+All visual values live in `lib/core/theme/`. **No raw colour** (`Color(0x…)`, `Colors.x`) outside that folder:
+`test/design_system_test.dart` fails if one appears. Widgets use `AppColors`, `AppText`, `AppSizes` and the
+neumorphic widgets in `lib/core/ui/neu.dart`.
 
-| Token | Value | Use |
-|---|---|---|
-| `AppColors.background` | `#FAF7F1` | Page |
-| `surface` | `#F3EEE4` | Panels, image placeholders |
-| `line` | `#E8E0D0` | Borders, dividers |
-| `ink` / `inkSoft` / `inkMuted` | `#14110F` / `#3A342F` / `#6B635B` | Text (all ≥ 4.5:1 on background) |
-| `gold` | `#B08D57` | Decoration only. **Never for text** (low contrast) |
-| `goldDeep` | `#8F6F3F` | Accent text, links, focus |
-| `danger` / `success` | `#6E1F2B` / `#3F5A45` | Errors / confirmations |
-| `paper` | `#FFFFFF` | Cards, inputs |
-| `photoScrim`, `photoScrimClear` | ink at 70% / 0% | Gradient over photos so white text is readable |
+**Dark mode.** `Palette.light` / `Palette.dark` in `app_colors.dart`. `AppColors.*` are getters that read the
+*active* palette, so widgets never check the mode. `ThemeController` (persisted in localStorage; default
+follows the OS) switches the palette, then `ThemeController.rebuildAll()` marks every element dirty so
+widgets re-read colours while keeping state (typed text, scroll, selections). Rules for this to keep working:
+read colours at build time (`AppColors.ink` inside `build`), **never cache an `AppColors` value in a `static
+final`/field/`const`**, and give text styles `Color? color` defaults resolved at call time (see `AppText`).
+The header sun/moon button toggles; `test/theme_test.dart` covers switching, persistence and that typed text
+survives.
 
-**Header pattern:** announcement strip (ink), logo + search + account + bag row, category rail (desktop); on mobile the search sits under the logo row. Product swatch colours come from product data via `AppColors.fromHex` (the one place raw colour parsing is allowed).
+| Token (`AppColors`) | Light | Dark | Use |
+|---|---|---|---|
+| `background` | `#E6E1F3` | `#221C37` | Page and all raised surfaces |
+| `surface` | `#DDD6EE` | `#1C1730` | Recessed areas: inset fields, panels, placeholders |
+| `line` | `#CFC7E4` | `#342C50` | Faint dividers |
+| `ink` / `inkSoft` / `inkMuted` | `#241C3D` / `#40375F` / `#5F5681` | `#F0ECFD` / `#D3CCEB` / `#A89FC8` | Text |
+| `accent` | `#5B3FC4` | `#B9A5FF` | Links, focus, ratings, emphasis text |
+| `accentSoft` | `#9B84E8` | `#7E64D8` | Decoration only (hover tints), never text |
+| `primary` / `primaryDeep` / `onPrimary` | `#6342D6` / `#4A2FB0` / white | `#B7A2FF` / `#9B83F0` / `#1B1433` | Primary buttons (and pressed), text on them |
+| `danger` / `success` | `#A32244` / `#2F6B4F` | `#FF8FA8` / `#7DD4A8` | Errors / confirmations |
+| `shadowLight` / `shadowDark` | `#FBF9FF` / `#B9AFD8` | `#30284F` / `#130F23` | The two neumorphic shadows |
+| `onPhoto`, `photoScrim*`, `clear` | white, ink scrim, transparent | same | Text over photos, overlays |
 
-**Typography** (`AppText`): `display()` Cormorant Garamond for headings, `body()` Jost, `eyebrow()` small
-tracked uppercase labels, `button()`; Pinyon Script is for the logo only. Variable fonts, weights set
-through `fontVariations`. **Shape:** square corners (radius 0) everywhere. **Touch targets** ≥ 48px
-(`AppSizes.minTouchTarget`). **Breakpoints:** mobile < 700, desktop ≥ 1000 (`core/ui/layout.dart`).
-**Logo:** `Logo` widget (script text, gold K under the ink L). 🟡 The owner may later supply final artwork;
-replace the widget body, keep its parameters. **Images:** free Pexels photos (no attribution required).
+`test/theme_test.dart` enforces contrast in both modes: every text colour ≥ 4.5:1 on `background` (≥ 4:1 on
+`surface`), and `onPrimary` ≥ 4.5:1 on `primary`/`primaryDeep`, plus that `shadowLight` is lighter and
+`shadowDark` darker than the background (the effect needs that).
+
+**Neumorphic widgets (`core/ui/neu.dart`):** `NeuBox` (raised or `inset: true`), `NeuButton` (primary purple /
+`NeuButton.secondary`; sinks when pressed; same call shape as FilledButton), `NeuSelectable` (size chips,
+swatches, payment options, category pills: raised idle, pressed when selected), `NeuIconButton` (round header
+buttons with optional badge), `NeuTextField` (inset field, label above, error below), `NeuTapCard` (raised list
+row). Don't use Material `FilledButton`/`OutlinedButton`/`TextField` directly. Use text buttons only for quiet
+links. **Inset shadows** are painted with an even-odd path: do not use `Path.combine` (it flooded fields on the
+web renderer). **Shadows need room:** keep ~24px gaps between raised cards or the shadows collide.
+
+**Typography** (`AppText`): Jost for everything (`display()` headings, `body()`, `eyebrow()` small tracked
+uppercase labels, `button()`); Pinyon Script for the logo only. Variable font weights via `fontVariations`.
+**Shape:** rounded (cards 20-36, chips/buttons 14-16, photos 16-26). **Touch targets** ≥ 48px. **Breakpoints:**
+mobile < 700, desktop ≥ 1000. **Header pattern:** purple announcement strip, raised bar with logo, search,
+account, bag and theme toggle, category rail (desktop); on mobile the search sits under the logo row.
+**Logo:** `Logo` widget (cursive L over K, K in the accent purple; follows dark mode). 🟡 The owner may later
+supply final artwork; replace the widget body, keep its parameters. **Images:** free Pexels photos.
+**Product swatch colours** come from product data via `AppColors.fromHex` (the one place raw colour parsing is allowed).
 
 ---
 
@@ -452,7 +473,7 @@ keep Pexels `auto=compress`. Don't optimise before measuring. 🟡 Initial load:
 
 ## 23. Accessibility
 
-Target WCAG 2.1 AA. Contrast ≥ 4.5:1 with the tokens (never text on `gold`). Icon-only controls have
+Target WCAG 2.1 AA. Contrast ≥ 4.5:1 with the tokens (never text on `accentSoft`). Icon-only controls have
 `tooltip` / `Semantics(label)`. Touch targets ≥ 48px. Errors appear as text near the problem, not colour
 alone; order status is a word plus colour. Live changes (cart count, "Added to your bag", errors) use
 `Semantics(liveRegion: true)`. Keyboard: all actions reachable with Tab/Enter. Flutter web's accessibility
@@ -517,7 +538,6 @@ currency and tax; SEO strategy (§27); anything that could lose customer or orde
 | Product photos per colour | One gallery for all colours; gallery photos are stand-ins from the same category | Per-colour images from the owner |
 | Stock | Per product | Per size/colour variant |
 | Search | Name/description substring match with suggestions | Ranking, typo tolerance (e.g. Postgres full-text) |
-| Next.js version | Superseded; kept in `archive/nextjs/` | Delete when the owner agrees |
 
 ---
 

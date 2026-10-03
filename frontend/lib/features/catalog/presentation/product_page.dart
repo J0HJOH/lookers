@@ -15,6 +15,7 @@ import '../domain/product.dart';
 import '../domain/review.dart';
 import 'product_card.dart';
 import 'reviews_section.dart';
+import '../../../core/ui/neu.dart';
 
 class ProductPage extends StatelessWidget {
   const ProductPage({super.key, required this.slug});
@@ -144,27 +145,28 @@ class _ProductViewState extends State<_ProductView> {
   Widget _gallery({required bool desktop}) {
     final images = product.gallery;
     final index = _imageIndex.clamp(0, images.length - 1);
-    final main = AspectRatio(
-      aspectRatio: 4 / 5,
-      child: ProductImage(url: images[index], semanticLabel: product.name),
-    );
-    Widget thumb(int i, double size) => Semantics(
-      button: true,
-      selected: i == index,
-      label: 'Photo ${i + 1} of ${images.length}',
-      child: InkWell(
-        onTap: () => setState(() => _imageIndex = i),
-        child: Container(
-          width: size,
-          height: size * 1.25,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: i == index ? AppColors.ink : AppColors.line,
-              width: i == index ? 2 : 1,
-            ),
-          ),
-          child: ProductImage(url: images[i]),
+    final main = NeuBox(
+      radius: 30,
+      padding: const EdgeInsets.all(12),
+      child: AspectRatio(
+        aspectRatio: 4 / 5,
+        child: ProductImage(
+          url: images[index],
+          semanticLabel: product.name,
+          radius: 22,
         ),
+      ),
+    );
+    Widget thumb(int i, double size) => NeuSelectable(
+      selected: i == index,
+      semanticLabel: 'Photo ${i + 1} of ${images.length}',
+      radius: 16,
+      padding: const EdgeInsets.all(5),
+      onTap: () => setState(() => _imageIndex = i),
+      child: SizedBox(
+        width: size,
+        height: size * 1.25,
+        child: ProductImage(url: images[i], radius: 12),
       ),
     );
     if (desktop && images.length > 1) {
@@ -284,39 +286,30 @@ class _ProductViewState extends State<_ProductView> {
             runSpacing: 8,
             children: [
               for (final s in product.sizes)
-                Semantics(
-                  button: true,
+                NeuSelectable(
                   selected: _size == s,
-                  label: 'Size $s',
-                  child: InkWell(
-                    onTap: () => setState(() {
-                      _size = s;
-                      _error = null;
-                      _added = false;
-                    }),
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        minWidth: 52,
-                        minHeight: 48,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: _size == s ? AppColors.ink : AppColors.paper,
-                        border: Border.all(
-                          color: _size == s ? AppColors.ink : AppColors.line,
-                        ),
-                      ),
-                      child: Align(
-                        widthFactor: 1,
-                        heightFactor: 1,
-                        child: Text(
-                          s,
-                          style: AppText.body(
-                            size: 14,
-                            color: _size == s
-                                ? AppColors.background
-                                : AppColors.ink,
-                          ),
+                  semanticLabel: 'Size $s',
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  onTap: () => setState(() {
+                    _size = s;
+                    _error = null;
+                    _added = false;
+                  }),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 24),
+                    child: Center(
+                      widthFactor: 1,
+                      child: Text(
+                        s,
+                        style: AppText.body(
+                          size: 14,
+                          weight: _size == s
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: _size == s ? AppColors.accent : AppColors.ink,
                         ),
                       ),
                     ),
@@ -351,14 +344,14 @@ class _ProductViewState extends State<_ProductView> {
           children: [
             SizedBox(
               width: 230,
-              child: FilledButton(
+              child: NeuButton(
                 onPressed: soldOut ? null : () => _add(goToBag: false),
                 child: Text(soldOut ? 'SOLD OUT' : 'ADD TO BAG'),
               ),
             ),
             SizedBox(
               width: 230,
-              child: OutlinedButton(
+              child: NeuButton.secondary(
                 onPressed: soldOut ? null : () => _add(goToBag: true),
                 child: const Text('BUY NOW'),
               ),
@@ -418,7 +411,7 @@ class _ProductViewState extends State<_ProductView> {
                 ),
                 child: Text(
                   'Full policy',
-                  style: AppText.body(size: 14, color: AppColors.goldDeep),
+                  style: AppText.body(size: 14, color: AppColors.accent),
                 ),
               ),
             ],
@@ -467,34 +460,24 @@ class _Swatch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: 'Colour ${color.name}',
-      child: Tooltip(
-        message: color.name,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: Container(
-            width: 44,
-            height: 44,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected ? AppColors.ink : AppColors.line,
-                width: selected ? 2 : 1,
-              ),
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.fromHex(color.hex),
-                border: Border.all(color: AppColors.line),
-              ),
+    return Tooltip(
+      message: color.name,
+      child: NeuSelectable(
+        selected: selected,
+        semanticLabel: 'Colour ${color.name}',
+        radius: 26,
+        padding: const EdgeInsets.all(7),
+        onTap: onTap,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.fromHex(color.hex),
+            border: Border.all(
+              color: selected ? AppColors.accent : AppColors.line,
+              width: selected ? 2 : 1,
             ),
           ),
+          child: const SizedBox(width: 32, height: 32),
         ),
       ),
     );
@@ -514,26 +497,33 @@ class _Info extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: AppColors.line),
-      child: ExpansionTile(
-        initiallyExpanded: initiallyExpanded,
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 16),
-        expandedAlignment: Alignment.centerLeft,
-        expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        shape: const Border(),
-        collapsedShape: const Border(),
-        iconColor: AppColors.ink,
-        collapsedIconColor: AppColors.ink,
-        title: Text(
-          title.toUpperCase(),
-          style: AppText.button().copyWith(
-            color: AppColors.ink,
-            letterSpacing: 2.2,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: NeuBox(
+        radius: 20,
+        depth: 0.6,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: AppColors.clear),
+          child: ExpansionTile(
+            initiallyExpanded: initiallyExpanded,
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 16),
+            expandedAlignment: Alignment.centerLeft,
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            shape: const Border(),
+            collapsedShape: const Border(),
+            iconColor: AppColors.accent,
+            collapsedIconColor: AppColors.ink,
+            title: Text(
+              title.toUpperCase(),
+              style: AppText.button(
+                color: AppColors.ink,
+              ).copyWith(letterSpacing: 2.2),
+            ),
+            children: [child],
           ),
         ),
-        children: [child],
       ),
     );
   }

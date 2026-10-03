@@ -10,6 +10,7 @@ import '../../../core/ui/layout.dart';
 import '../../../core/ui/product_image.dart';
 import '../../checkout/domain/shipping_rules.dart';
 import '../domain/cart.dart';
+import '../../../core/ui/neu.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -58,18 +59,12 @@ class _CartContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = AppScope.of(context).cart;
     final lines = Column(
-      children: [
-        const Divider(),
-        for (final line in cart.lines) ...[
-          _LineRow(line: line),
-          const Divider(),
-        ],
-      ],
+      children: [for (final line in cart.lines) _LineRow(line: line)],
     );
     final summary = OrderSummaryCard(
       subtotal: cart.subtotal,
       rules: rules,
-      action: FilledButton(
+      action: NeuButton(
         onPressed: () => context.go('/checkout'),
         child: const Text('CHECKOUT'),
       ),
@@ -98,94 +93,102 @@ class _LineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = AppScope.of(context).cart;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => context.go('/product/${line.slug}'),
-            child: SizedBox(
-              width: 100,
-              height: 134,
-              child: ProductImage(url: line.imageUrl, semanticLabel: line.name),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: SizedBox(
-              height: 134,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(line.name, style: AppText.display(22)),
-                      ),
-                      Text(
-                        formatMoney(line.priceCents * line.quantity),
-                        style: AppText.body(size: 14, color: AppColors.ink),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    'Size ${line.size}',
-                    style: AppText.body(size: 14, color: AppColors.inkMuted),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.line),
-                        ),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              tooltip: 'Decrease quantity of ${line.name}',
-                              icon: const Icon(Icons.remove, size: 18),
-                              onPressed: () =>
-                                  cart.setQty(line, line.quantity - 1),
-                            ),
-                            Semantics(
-                              liveRegion: true,
-                              child: SizedBox(
-                                width: 28,
-                                child: Text(
-                                  '${line.quantity}',
-                                  textAlign: TextAlign.center,
-                                  style: AppText.body(color: AppColors.ink),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: 'Increase quantity of ${line.name}',
-                              icon: const Icon(Icons.add, size: 18),
-                              onPressed: line.quantity >= maxQtyPerLine
-                                  ? null
-                                  : () => cart.setQty(line, line.quantity + 1),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => cart.remove(line),
-                        child: Text(
-                          'REMOVE',
-                          style: AppText.eyebrow().copyWith(
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+      padding: const EdgeInsets.only(bottom: 24),
+      child: NeuBox(
+        radius: 26,
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () => context.go('/product/${line.slug}'),
+              child: SizedBox(
+                width: 100,
+                height: 134,
+                child: ProductImage(
+                  url: line.imageUrl,
+                  semanticLabel: line.name,
+                ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 20),
+            Expanded(
+              child: SizedBox(
+                height: 134,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(line.name, style: AppText.display(22)),
+                        ),
+                        Text(
+                          formatMoney(line.priceCents * line.quantity),
+                          style: AppText.body(size: 14, color: AppColors.ink),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${line.color == null ? '' : 'Colour ${line.color}  ·  '}Size ${line.size}',
+                      style: AppText.body(size: 14, color: AppColors.inkMuted),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        NeuBox(
+                          inset: true,
+                          radius: 14,
+                          depth: 0.5,
+                          child: Row(
+                            children: [
+                              IconButton(
+                                tooltip: 'Decrease quantity of ${line.name}',
+                                icon: const Icon(Icons.remove, size: 18),
+                                onPressed: () =>
+                                    cart.setQty(line, line.quantity - 1),
+                              ),
+                              Semantics(
+                                liveRegion: true,
+                                child: SizedBox(
+                                  width: 28,
+                                  child: Text(
+                                    '${line.quantity}',
+                                    textAlign: TextAlign.center,
+                                    style: AppText.body(color: AppColors.ink),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: 'Increase quantity of ${line.name}',
+                                icon: const Icon(Icons.add, size: 18),
+                                onPressed: line.quantity >= maxQtyPerLine
+                                    ? null
+                                    : () =>
+                                          cart.setQty(line, line.quantity + 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () => cart.remove(line),
+                          child: Text(
+                            'REMOVE',
+                            style: AppText.eyebrow().copyWith(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -231,8 +234,8 @@ class OrderSummaryCard extends StatelessWidget {
         ],
       ),
     );
-    return Container(
-      color: AppColors.surface,
+    return NeuBox(
+      radius: 28,
       padding: const EdgeInsets.all(28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

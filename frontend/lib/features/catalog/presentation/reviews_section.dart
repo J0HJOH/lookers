@@ -8,6 +8,7 @@ import '../../../core/ui/product_image.dart';
 import '../../../core/ui/star_rating.dart';
 import '../domain/product.dart';
 import '../domain/review.dart';
+import '../../../core/ui/neu.dart';
 
 /// Rating summary plus the list of reviews. Each review shows what the customer bought and the
 /// variety (colour, size) they chose.
@@ -58,7 +59,6 @@ class ReviewsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(),
         const SizedBox(height: 32),
         Text('Customer reviews', style: AppText.display(mobile ? 32 : 40)),
         const SizedBox(height: 28),
@@ -105,10 +105,22 @@ class _Distribution extends StatelessWidget {
                 Expanded(
                   child: Stack(
                     children: [
-                      Container(height: 6, color: AppColors.line),
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                       FractionallySizedBox(
                         widthFactor: shares[star - 1],
-                        child: Container(height: 6, color: AppColors.goldDeep),
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -132,106 +144,109 @@ class _ReviewTile extends StatelessWidget {
     final initial = review.authorName.isEmpty
         ? '?'
         : review.authorName[0].toUpperCase();
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.line)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: AppColors.surface,
-                child: Text(
-                  initial,
-                  style: AppText.body(
-                    color: AppColors.ink,
-                    weight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  review.authorName,
-                  style: AppText.body(
-                    color: AppColors.ink,
-                    weight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Text(
-                formatDate(review.createdAt),
-                style: AppText.body(size: 13, color: AppColors.inkMuted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          StarRating(rating: review.rating.toDouble()),
-          if (review.title.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              review.title,
-              style: AppText.body(
-                color: AppColors.ink,
-                weight: FontWeight.w500,
-              ),
-            ),
-          ],
-          const SizedBox(height: 6),
-          Text(review.body, style: AppText.body(size: 15)),
-          const SizedBox(height: 14),
-          // What this customer bought, with the variety they chose.
-          Container(
-            padding: const EdgeInsets.all(10),
-            color: AppColors.surface,
-            child: Row(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: NeuBox(
+        radius: 24,
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                SizedBox(
-                  width: 40,
-                  height: 52,
-                  child: ProductImage(url: product.imageUrl),
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.surface,
+                  child: Text(
+                    initial,
+                    style: AppText.body(
+                      color: AppColors.ink,
+                      weight: FontWeight.w500,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'PURCHASED',
-                        style: AppText.eyebrow().copyWith(
-                          fontSize: 10,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                      Text(
-                        product.name,
-                        style: AppText.body(
-                          size: 14,
-                          color: AppColors.ink,
-                          weight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        [
-                          if (review.color != null) 'Colour: ${review.color}',
-                          if (review.size != null) 'Size: ${review.size}',
-                        ].join('  ·  '),
-                        style: AppText.body(
-                          size: 13,
-                          color: AppColors.inkMuted,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    review.authorName,
+                    style: AppText.body(
+                      color: AppColors.ink,
+                      weight: FontWeight.w500,
+                    ),
                   ),
+                ),
+                Text(
+                  formatDate(review.createdAt),
+                  style: AppText.body(size: 13, color: AppColors.inkMuted),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            StarRating(rating: review.rating.toDouble()),
+            if (review.title.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                review.title,
+                style: AppText.body(
+                  color: AppColors.ink,
+                  weight: FontWeight.w500,
+                ),
+              ),
+            ],
+            const SizedBox(height: 6),
+            Text(review.body, style: AppText.body(size: 15)),
+            const SizedBox(height: 14),
+            // What this customer bought, with the variety they chose.
+            NeuBox(
+              inset: true,
+              radius: 16,
+              depth: 0.5,
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 52,
+                    child: ProductImage(url: product.imageUrl, radius: 10),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'PURCHASED',
+                          style: AppText.eyebrow().copyWith(
+                            fontSize: 10,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        Text(
+                          product.name,
+                          style: AppText.body(
+                            size: 14,
+                            color: AppColors.ink,
+                            weight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          [
+                            if (review.color != null) 'Colour: ${review.color}',
+                            if (review.size != null) 'Size: ${review.size}',
+                          ].join('  ·  '),
+                          style: AppText.body(
+                            size: 13,
+                            color: AppColors.inkMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

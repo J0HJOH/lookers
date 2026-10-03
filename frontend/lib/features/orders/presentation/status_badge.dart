@@ -13,13 +13,13 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (Color border, Color? fill, Color text) = switch (status) {
-      OrderStatus.pending => (AppColors.goldDeep, null, AppColors.goldDeep),
+      OrderStatus.pending => (AppColors.accent, null, AppColors.accent),
       OrderStatus.confirmed => (AppColors.ink, null, AppColors.ink),
       OrderStatus.shipped => (AppColors.success, null, AppColors.success),
       OrderStatus.delivered => (
         AppColors.success,
         AppColors.success,
-        AppColors.paper,
+        AppColors.onPrimary,
       ),
       OrderStatus.cancelled => (AppColors.danger, null, AppColors.danger),
     };
@@ -27,6 +27,7 @@ class StatusBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: fill,
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: border),
       ),
       child: Text(

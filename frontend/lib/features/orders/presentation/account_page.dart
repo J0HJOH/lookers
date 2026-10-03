@@ -10,6 +10,7 @@ import '../../../core/ui/layout.dart';
 import '../domain/order.dart';
 import 'order_details.dart';
 import 'status_badge.dart';
+import '../../../core/ui/neu.dart';
 
 /// The customer dashboard: greeting, sign out and order history.
 class AccountPage extends StatelessWidget {
@@ -52,7 +53,7 @@ class AccountPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  OutlinedButton(
+                  NeuButton.secondary(
                     onPressed: () async {
                       await scope.auth.signOut();
                       if (context.mounted) context.go('/');
@@ -68,10 +69,9 @@ class AccountPage extends StatelessWidget {
                 load: scope.orders.listOrders,
                 builder: (context, orders) {
                   if (orders.isEmpty) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.line),
-                      ),
+                    return NeuBox(
+                      inset: true,
+                      radius: 24,
                       child: EmptyState(
                         title: 'No orders yet.',
                         actionLabel: 'Start shopping',
@@ -81,9 +81,8 @@ class AccountPage extends StatelessWidget {
                   }
                   return Column(
                     children: [
-                      const Divider(),
                       for (final o in orders) ...[
-                        InkWell(
+                        NeuTapCard(
                           onTap: () => context.go('/account/orders/${o.id}'),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -130,7 +129,6 @@ class AccountPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const Divider(),
                       ],
                     ],
                   );

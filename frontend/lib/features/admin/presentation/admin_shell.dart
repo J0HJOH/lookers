@@ -30,11 +30,8 @@ class AdminShell extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.line)),
-            ),
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               spacing: 32,
@@ -52,7 +49,7 @@ class AdminShell extends StatelessWidget {
                             (l.$2 == '/admin'
                                 ? location == '/admin'
                                 : location.startsWith(l.$2))
-                            ? AppColors.goldDeep
+                            ? AppColors.accent
                             : AppColors.ink,
                       ),
                     ),

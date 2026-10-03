@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../error/failure.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import 'neu.dart';
 
 /// Loads a future and shows loading / error (with Retry) / data states consistently.
 class AsyncView<T> extends StatefulWidget {
@@ -34,13 +35,13 @@ class _AsyncViewState<T> extends State<AsyncView<T>> {
         if (snapshot.connectionState != ConnectionState.done) {
           return SizedBox(
             height: widget.minHeight,
-            child: const Center(
+            child: Center(
               child: SizedBox(
                 width: 28,
                 height: 28,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.goldDeep,
+                  color: AppColors.accent,
                 ),
               ),
             ),
@@ -81,7 +82,7 @@ class ErrorState extends StatelessWidget {
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            OutlinedButton(onPressed: onRetry, child: const Text('RETRY')),
+            NeuButton.secondary(onPressed: onRetry, child: const Text('RETRY')),
           ],
         ],
       ),
@@ -126,7 +127,7 @@ class EmptyState extends StatelessWidget {
             ],
             if (actionLabel != null) ...[
               const SizedBox(height: 28),
-              FilledButton(
+              NeuButton(
                 onPressed: onAction,
                 child: Text(actionLabel!.toUpperCase()),
               ),

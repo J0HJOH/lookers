@@ -8,6 +8,7 @@ import '../../../core/ui/app_scope.dart';
 import '../../../core/ui/layout.dart';
 import '../../../core/ui/logo.dart';
 import '../domain/safe_next_path.dart';
+import '../../../core/ui/neu.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, this.next, this.hadError = false});
@@ -64,8 +65,8 @@ class _LoginPageState extends State<LoginPage> {
         return PageContainer(
           maxWidth: 520,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 64),
-          child: Container(
-            color: AppColors.paper,
+          child: NeuBox(
+            radius: 32,
             padding: EdgeInsets.symmetric(
               horizontal: isMobile(context) ? 24 : 48,
               vertical: 48,
@@ -88,10 +89,17 @@ class _LoginPageState extends State<LoginPage> {
                   style: AppText.body(size: 14, color: AppColors.inkMuted),
                 ),
                 const SizedBox(height: 32),
-                OutlinedButton.icon(
+                NeuButton.secondary(
+                  expand: true,
                   onPressed: _busy ? null : _signIn,
-                  icon: const Icon(Icons.account_circle_outlined, size: 20),
-                  label: Text(_busy ? 'REDIRECTING…' : 'CONTINUE WITH GOOGLE'),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.account_circle_outlined, size: 20),
+                      const SizedBox(width: 10),
+                      Text(_busy ? 'REDIRECTING…' : 'CONTINUE WITH GOOGLE'),
+                    ],
+                  ),
                 ),
                 if (message != null)
                   Padding(

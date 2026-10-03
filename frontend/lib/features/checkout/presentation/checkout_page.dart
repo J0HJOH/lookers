@@ -11,6 +11,7 @@ import '../../cart/presentation/cart_page.dart';
 import '../../orders/domain/place_order.dart';
 import '../domain/shipping_address.dart';
 import '../domain/shipping_rules.dart';
+import '../../../core/ui/neu.dart';
 
 class CheckoutPage extends StatelessWidget {
   const CheckoutPage({super.key});
@@ -199,17 +200,16 @@ class _CheckoutFormState extends State<_CheckoutForm> {
     bool optional = false,
     int? maxLength,
   }) {
-    return TextField(
+    return NeuTextField(
       controller: _ctl(name),
       keyboardType: type,
       maxLines: maxLines,
       maxLength: maxLength,
       autofillHints: hints,
-      decoration: InputDecoration(
-        labelText: optional ? '$label (optional)' : label,
-        errorText: _fieldErrors[name],
-        counterText: '',
-      ),
+      label: optional ? '$label (optional)' : label,
+      errorText: _fieldErrors[name],
+      // Keep what was typed so a sign-in round trip (or a theme switch) never loses it.
+      onChanged: (_) => AppScope.of(context).drafts.write(_values()),
     );
   }
 
@@ -237,29 +237,31 @@ class _CheckoutFormState extends State<_CheckoutForm> {
             listenable: scope.auth,
             builder: (context, _) => scope.auth.isSignedIn
                 ? const SizedBox.shrink()
-                : Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 32),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      border: Border.all(color: AppColors.line),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.lock_outline,
-                          color: AppColors.goldDeep,
+                : Padding(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: NeuBox(
+                        inset: true,
+                        radius: 20,
+                        padding: const EdgeInsets.all(20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.lock_outline, color: AppColors.accent),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Text(
+                                'Fill in your details now. When you place your order you\'ll sign in or sign up with Google (one tap, no password), then come straight back here.',
+                                style: AppText.body(
+                                  size: 14,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Text(
-                            'Fill in your details now. When you place your order you\'ll sign in or sign up with Google (one tap, no password), then come straight back here.',
-                            style: AppText.body(size: 14, color: AppColors.ink),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
           ),
@@ -360,7 +362,7 @@ class _CheckoutFormState extends State<_CheckoutForm> {
                     ),
                   ),
                 ),
-              FilledButton(
+              NeuButton(
                 onPressed: _busy || cardSelected
                     ? null
                     : (signedIn ? _submit : _signInToContinue),
@@ -420,60 +422,51 @@ class _PaymentSection extends StatelessWidget {
       Widget? body,
     }) {
       final isSelected = selected == method;
-      return Semantics(
-        button: true,
-        selected: isSelected,
-        child: InkWell(
+      return SizedBox(
+        width: double.infinity,
+        child: NeuSelectable(
+          selected: isSelected,
+          radius: 20,
+          padding: const EdgeInsets.all(18),
           onTap: () => onChanged(method),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: AppColors.paper,
-              border: Border.all(
-                color: isSelected ? AppColors.ink : AppColors.line,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      isSelected
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
-                      color: AppColors.ink,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: AppText.body(
-                          color: AppColors.ink,
-                          weight: FontWeight.w500,
-                        ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    color: isSelected ? AppColors.accent : AppColors.ink,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppText.body(
+                        color: AppColors.ink,
+                        weight: FontWeight.w500,
                       ),
                     ),
-                    ?badge,
-                  ],
+                  ),
+                  ?badge,
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 32, top: 4),
+                child: Text(
+                  subtitle,
+                  style: AppText.body(size: 13, color: AppColors.inkMuted),
                 ),
+              ),
+              if (isSelected && body != null)
                 Padding(
-                  padding: const EdgeInsets.only(left: 32, top: 4),
-                  child: Text(
-                    subtitle,
-                    style: AppText.body(size: 13, color: AppColors.inkMuted),
-                  ),
+                  padding: const EdgeInsets.only(left: 32, top: 16),
+                  child: body,
                 ),
-                if (isSelected && body != null)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 32, top: 16),
-                    child: body,
-                  ),
-              ],
-            ),
+            ],
           ),
         ),
       );
@@ -491,9 +484,10 @@ class _PaymentSection extends StatelessWidget {
           method: _PaymentMethod.card,
           title: 'Credit or debit card',
           subtitle: 'Visa, Mastercard and more.',
-          badge: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: AppColors.surface,
+          badge: NeuBox(
+            radius: 10,
+            depth: 0.4,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Text(
               'COMING SOON',
               style: AppText.eyebrow().copyWith(
@@ -505,42 +499,33 @@ class _PaymentSection extends StatelessWidget {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const TextField(
+              const NeuTextField(
                 enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Card number',
-                  hintText: '1234 5678 9012 3456',
-                ),
+                label: 'Card number',
+                hint: '1234 5678 9012 3456',
               ),
               const SizedBox(height: 12),
               const Row(
                 children: [
                   Expanded(
-                    child: TextField(
+                    child: NeuTextField(
                       enabled: false,
-                      decoration: InputDecoration(
-                        labelText: 'Expiry',
-                        hintText: 'MM / YY',
-                      ),
+                      label: 'Expiry',
+                      hint: 'MM / YY',
                     ),
                   ),
                   SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
+                    child: NeuTextField(
                       enabled: false,
-                      decoration: InputDecoration(
-                        labelText: 'CVC',
-                        hintText: '123',
-                      ),
+                      label: 'CVC',
+                      hint: '123',
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              const TextField(
-                enabled: false,
-                decoration: InputDecoration(labelText: 'Name on card'),
-              ),
+              const NeuTextField(enabled: false, label: 'Name on card'),
               const SizedBox(height: 12),
               Text(
                 'Card payments aren\'t available yet. Please choose Pay on delivery to place your order.',

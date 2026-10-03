@@ -7,6 +7,7 @@ import '../../../core/ui/layout.dart';
 import '../../../core/ui/product_image.dart';
 import '../domain/order.dart';
 import 'status_badge.dart';
+import '../../../core/ui/neu.dart';
 
 class OrderDetails extends StatelessWidget {
   const OrderDetails({super.key, required this.order});
@@ -95,8 +96,8 @@ class OrderDetails extends StatelessWidget {
         ],
       ),
     );
-    final side = Container(
-      color: AppColors.surface,
+    final side = NeuBox(
+      radius: 26,
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

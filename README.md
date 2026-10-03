@@ -1,7 +1,7 @@
 # Lookers
 
 An e-commerce site for the Lookers clothing brand: men's, women's and baby's clothing, hats, shoes and bags.
-Luxury-editorial design, Google sign-in, a customer dashboard, checkout and an admin dashboard.
+Neumorphic purple design with light and dark modes, Google sign-in, a customer dashboard, checkout and an admin dashboard.
 
 | Part | Technology |
 |---|---|
@@ -48,7 +48,6 @@ Console, Mailgun and deployment are steps you do yourself.
 - [AGENTS.md](AGENTS.md): engineering contract for AI coding agents (architecture, design system, security
   rules, definition of done, open decisions).
 - [docs/SETUP.md](docs/SETUP.md): owner setup directives.
-- `archive/nextjs/`: the earlier Next.js version of the frontend, kept for reference. Safe to delete.
 
 Product photos are free images from [Pexels](https://www.pexels.com/license/). Fonts are SIL OFL
 (licences in `frontend/assets/fonts`).

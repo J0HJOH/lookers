@@ -9,6 +9,7 @@ import 'package:lookers/features/checkout/data/checkout_draft_storage.dart';
 import 'package:lookers/features/orders/data/supabase_order_repository.dart';
 import 'package:lookers/features/orders/domain/place_order.dart';
 import 'package:lookers/app.dart';
+import 'package:lookers/core/theme/theme_controller.dart';
 
 CartLine line({
   String slug = 'a',
@@ -36,6 +37,7 @@ LookersApp previewApp({AdminRepository? admin}) {
     admin: admin,
     auth: AuthController(null),
     cart: CartController(MemoryCartStorage()),
+    theme: ThemeController(null),
     placeOrder: const PlaceOrder(orders, NoopConfirmationNotifier()),
     isPreview: true,
   );

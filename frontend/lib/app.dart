@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'core/ui/app_scope.dart';
 import 'features/admin/domain/admin_repository.dart';
 import 'features/auth/presentation/auth_controller.dart';
@@ -23,6 +24,7 @@ class LookersApp extends StatefulWidget {
     required this.admin,
     required this.auth,
     required this.cart,
+    required this.theme,
     required this.placeOrder,
     required this.isPreview,
   });
@@ -34,6 +36,7 @@ class LookersApp extends StatefulWidget {
   final AdminRepository? admin;
   final AuthController auth;
   final CartController cart;
+  final ThemeController theme;
   final PlaceOrder placeOrder;
   final bool isPreview;
 
@@ -60,13 +63,19 @@ class _LookersAppState extends State<LookersApp> {
       admin: widget.admin,
       auth: widget.auth,
       cart: widget.cart,
+      theme: widget.theme,
       placeOrder: widget.placeOrder,
       isPreview: widget.isPreview,
-      child: MaterialApp.router(
-        title: 'Lookers',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        routerConfig: _router,
+      child: ListenableBuilder(
+        listenable: widget.theme,
+        builder: (context, _) => MaterialApp.router(
+          title: 'Lookers',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.build(widget.theme.palette),
+          // Colours are read from the active palette and switch instantly; no cross-fade.
+          themeAnimationDuration: Duration.zero,
+          routerConfig: _router,
+        ),
       ),
     );
   }

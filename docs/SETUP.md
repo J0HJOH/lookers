@@ -262,7 +262,7 @@ git push -u origin main
 - **Real products:** replace the samples in **/admin/products**. Image URLs must come from an allowed
   host (`frontend/lib/features/admin/domain/image_hosts.dart`; today Pexels).
 - **Policies:** review and replace the draft text.
-- **Final logo artwork** and comparison with your Behance reference.
+- **Final logo artwork** and sign-off on the purple neumorphic look (light and dark).
 
 ## Troubleshooting
 

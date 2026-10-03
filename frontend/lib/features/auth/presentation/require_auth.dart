@@ -20,7 +20,7 @@ class RequireAuth extends StatelessWidget {
       builder: (context, _) {
         final allowed = auth.isSignedIn && (!adminOnly || auth.user!.isAdmin);
         if (allowed) return child;
-        return const SizedBox(
+        return SizedBox(
           height: 420,
           child: Center(
             child: SizedBox(
@@ -28,7 +28,7 @@ class RequireAuth extends StatelessWidget {
               height: 28,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.goldDeep,
+                color: AppColors.accent,
               ),
             ),
           ),

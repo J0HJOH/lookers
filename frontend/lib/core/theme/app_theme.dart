@@ -17,117 +17,111 @@ class AppSizes {
 class AppTheme {
   const AppTheme._();
 
-  static ThemeData get light {
-    const scheme = ColorScheme.light(
-      primary: AppColors.ink,
-      onPrimary: AppColors.background,
-      secondary: AppColors.goldDeep,
-      onSecondary: AppColors.paper,
-      surface: AppColors.background,
-      onSurface: AppColors.ink,
-      error: AppColors.danger,
-      onError: AppColors.paper,
-      outline: AppColors.line,
+  /// Material theme for [p]. Neumorphic surfaces and buttons are drawn by the widgets in
+  /// `core/ui/neu.dart`; this sets the defaults for everything else (text, dialogs, menus, tiles).
+  static ThemeData build(Palette p) {
+    final scheme = ColorScheme(
+      brightness: p.brightness,
+      primary: p.primary,
+      onPrimary: p.onPrimary,
+      secondary: p.accent,
+      onSecondary: p.onPrimary,
+      surface: p.background,
+      onSurface: p.ink,
+      error: p.danger,
+      onError: p.onPrimary,
+      outline: p.line,
     );
-    const square = RoundedRectangleBorder();
+    final rounded = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    );
     return ThemeData(
       useMaterial3: true,
+      brightness: p.brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: p.background,
+      canvasColor: p.background,
       fontFamily: AppText.bodyFamily,
       textTheme: TextTheme(
         bodyMedium: AppText.body(),
         bodyLarge: AppText.body(size: 16),
-        bodySmall: AppText.body(size: 13, color: AppColors.inkMuted),
+        bodySmall: AppText.body(size: 13, color: p.inkMuted),
         titleLarge: AppText.display(28),
       ),
-      dividerColor: AppColors.line,
-      dividerTheme: const DividerThemeData(
-        color: AppColors.line,
+      dividerColor: p.line,
+      dividerTheme: DividerThemeData(
+        color: p.line.withValues(alpha: 0.7),
         thickness: 1,
         space: 1,
       ),
       splashFactory: NoSplash.splashFactory,
-      filledButtonTheme: FilledButtonThemeData(
-        style:
-            FilledButton.styleFrom(
-              backgroundColor: AppColors.ink,
-              foregroundColor: AppColors.background,
-              disabledBackgroundColor: AppColors.line,
-              shape: square,
-              minimumSize: const Size(48, AppSizes.minTouchTarget),
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              textStyle: AppText.button(),
-            ).copyWith(
-              overlayColor: WidgetStatePropertyAll(
-                AppColors.goldDeep.withValues(alpha: 0.18),
-              ),
-            ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.ink,
-          side: const BorderSide(color: AppColors.ink),
-          shape: square,
-          minimumSize: const Size(48, AppSizes.minTouchTarget),
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          textStyle: AppText.button(),
-        ),
-      ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.ink,
-          shape: square,
+          foregroundColor: p.ink,
+          shape: rounded,
           minimumSize: const Size(48, AppSizes.minTouchTarget),
           textStyle: AppText.button(),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.paper,
-        labelStyle: AppText.body(color: AppColors.inkMuted, size: 14),
-        floatingLabelStyle: AppText.body(color: AppColors.goldDeep, size: 14),
-        errorStyle: AppText.body(color: AppColors.danger, size: 12),
+        fillColor: p.surfaceAlt,
+        labelStyle: AppText.body(color: p.inkMuted, size: 14),
+        floatingLabelStyle: AppText.body(color: p.accent, size: 14),
+        errorStyle: AppText.body(color: p.danger, size: 12),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 16,
+          vertical: 14,
         ),
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.line),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
         ),
-        enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.line),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.goldDeep),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: p.accent, width: 1.5),
         ),
-        errorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.danger),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: p.danger),
         ),
-        focusedErrorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: AppColors.danger),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: p.danger, width: 1.5),
         ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: p.ink),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: p.background,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.ink,
-        contentTextStyle: AppText.body(color: AppColors.background),
+        backgroundColor: p.ink,
+        contentTextStyle: AppText.body(color: p.background),
         behavior: SnackBarBehavior.floating,
-        shape: square,
+        shape: rounded,
       ),
       checkboxTheme: CheckboxThemeData(
-        shape: square,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         fillColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected)
-              ? AppColors.ink
-              : AppColors.paper,
+          (s) => s.contains(WidgetState.selected) ? p.primary : p.surfaceAlt,
         ),
-        side: const BorderSide(color: AppColors.ink),
+        checkColor: WidgetStatePropertyAll(p.onPrimary),
+        side: BorderSide(color: p.inkMuted),
       ),
+      popupMenuTheme: PopupMenuThemeData(color: p.background, shape: rounded),
+      expansionTileTheme: ExpansionTileThemeData(
+        iconColor: p.ink,
+        collapsedIconColor: p.ink,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: p.accent),
     );
   }
 }

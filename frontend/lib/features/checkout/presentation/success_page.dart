@@ -8,6 +8,7 @@ import '../../../core/ui/app_scope.dart';
 import '../../../core/ui/async_view.dart';
 import '../../../core/ui/layout.dart';
 import '../../orders/domain/order.dart';
+import '../../../core/ui/neu.dart';
 
 class CheckoutSuccessPage extends StatelessWidget {
   const CheckoutSuccessPage({super.key, required this.orderId});
@@ -77,12 +78,12 @@ class CheckoutSuccessPage extends StatelessWidget {
                       runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
-                        FilledButton(
+                        NeuButton(
                           onPressed: () =>
                               context.go('/account/orders/${order.id}'),
                           child: const Text('VIEW ORDER'),
                         ),
-                        OutlinedButton(
+                        NeuButton.secondary(
                           onPressed: () => context.go('/shop'),
                           child: const Text('KEEP SHOPPING'),
                         ),

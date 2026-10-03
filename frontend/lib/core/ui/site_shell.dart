@@ -57,7 +57,9 @@ class _NavDrawer extends StatelessWidget {
 
     return Drawer(
       backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(28)),
+      ),
       child: SafeArea(
         child: ListenableBuilder(
           listenable: scope.auth,
@@ -83,12 +85,23 @@ class _NavDrawer extends StatelessWidget {
                 ),
                 for (final item in items)
                   ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     title: Text(
                       item.$1.toUpperCase(),
                       style: AppText.button().copyWith(color: AppColors.ink),
                     ),
                     onTap: () => go(item.$2),
                   ),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.only(left: 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ThemeToggleButton(),
+                  ),
+                ),
               ],
             );
           },
@@ -148,9 +161,21 @@ class _Footer extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(top: 96),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.line)),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            offset: const Offset(0, -6),
+            blurRadius: 16,
+          ),
+          BoxShadow(
+            color: AppColors.shadowDark.withValues(alpha: 0.5),
+            offset: const Offset(0, -2),
+            blurRadius: 8,
+          ),
+        ],
       ),
       child: Column(
         children: [

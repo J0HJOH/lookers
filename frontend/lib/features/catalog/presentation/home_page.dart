@@ -11,6 +11,7 @@ import '../../../core/ui/product_image.dart';
 import '../domain/category.dart';
 import '../domain/product.dart';
 import 'product_card.dart';
+import '../../../core/ui/neu.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -50,13 +51,13 @@ class _PreviewBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.ink,
+      color: AppColors.primaryDeep,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Text(
         'PREVIEW MODE: SUPABASE ISN\'T CONNECTED YET, SO THIS IS THE BUNDLED SAMPLE CATALOGUE. SEE docs/SETUP.md.',
         textAlign: TextAlign.center,
         style: AppText.eyebrow(
-          color: AppColors.background,
+          color: AppColors.onPrimary,
         ).copyWith(letterSpacing: 2),
       ),
     );
@@ -84,8 +85,7 @@ class _Hero extends StatelessWidget {
                 text: 'intent.',
                 style: AppText.display(
                   desktop ? 88 : 60,
-                  color: AppColors.goldDeep,
-                  italic: true,
+                  color: AppColors.accent,
                 ),
               ),
             ],
@@ -105,11 +105,11 @@ class _Hero extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            FilledButton(
+            NeuButton(
               onPressed: () => context.go('/shop'),
               child: const Text('SHOP THE COLLECTION'),
             ),
-            OutlinedButton(
+            NeuButton.secondary(
               onPressed: () => context.go('/shop?category=womens-clothing'),
               child: const Text('WOMEN'),
             ),
@@ -117,20 +117,30 @@ class _Hero extends StatelessWidget {
         ),
       ],
     );
-    final photo = AspectRatio(
-      aspectRatio: desktop ? 3 / 4 : 4 / 5,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (category != null)
-            ProductImage(
-              url: category!.imageUrl,
-              semanticLabel: 'Lookers collection',
-            )
-          else
-            const ColoredBox(color: AppColors.surface),
-          const Positioned(left: 24, bottom: 24, child: _LogoBadge()),
-        ],
+    final photo = NeuBox(
+      radius: 36,
+      padding: const EdgeInsets.all(14),
+      child: AspectRatio(
+        aspectRatio: desktop ? 3 / 4 : 4 / 5,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (category != null)
+              ProductImage(
+                url: category!.imageUrl,
+                semanticLabel: 'Lookers collection',
+                radius: 26,
+              )
+            else
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(26),
+                ),
+              ),
+            const Positioned(left: 20, bottom: 20, child: _LogoBadge()),
+          ],
+        ),
       ),
     );
     return PageContainer(
@@ -159,10 +169,11 @@ class _LogoBadge extends StatelessWidget {
   const _LogoBadge();
 
   @override
-  Widget build(BuildContext context) => Container(
-    color: AppColors.background.withValues(alpha: 0.9),
-    padding: const EdgeInsets.all(14),
-    child: const Logo(size: 40),
+  Widget build(BuildContext context) => const NeuBox(
+    radius: 20,
+    depth: 0.6,
+    padding: EdgeInsets.all(12),
+    child: Logo(size: 38),
   );
 }
 
@@ -235,46 +246,56 @@ class _CategoryTile extends StatelessWidget {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           onTap: () => context.go('/shop?category=${category.slug}'),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ProductImage(url: category.imageUrl),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.center,
-                    colors: [AppColors.photoScrim, AppColors.photoScrimClear],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: 20,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      category.name,
-                      style: AppText.display(
-                        isMobile(context) ? 24 : 32,
-                        color: AppColors.paper,
+          child: NeuBox(
+            radius: 30,
+            padding: const EdgeInsets.all(8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ProductImage(url: category.imageUrl, radius: 24),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.center,
+                        colors: [
+                          AppColors.photoScrim,
+                          AppColors.photoScrimClear,
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      category.tagline.toUpperCase(),
-                      maxLines: 2,
-                      style: AppText.eyebrow(
-                        color: AppColors.paper,
-                      ).copyWith(letterSpacing: 1.8),
+                  ),
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          category.name,
+                          style: AppText.display(
+                            isMobile(context) ? 24 : 32,
+                            color: AppColors.onPhoto,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          category.tagline.toUpperCase(),
+                          maxLines: 2,
+                          style: AppText.eyebrow(
+                            color: AppColors.onPhoto,
+                          ).copyWith(letterSpacing: 1.8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -329,22 +350,38 @@ class _Perks extends StatelessWidget {
             children: [
               Text(
                 p.$1,
-                style: AppText.display(28, color: AppColors.background),
+                style: AppText.display(26, color: AppColors.onPrimary),
               ),
               const SizedBox(height: 8),
-              Text(p.$2, style: AppText.body(size: 14, color: AppColors.line)),
+              Text(
+                p.$2,
+                style: AppText.body(size: 14, color: AppColors.onPrimary),
+              ),
             ],
           ),
         ),
     ];
-    return Container(
-      margin: const EdgeInsets.only(top: 56),
-      color: AppColors.ink,
-      padding: const EdgeInsets.symmetric(vertical: 56),
-      child: PageContainer(
-        child: mobile
-            ? Column(children: items)
-            : Row(children: [for (final i in items) Expanded(child: i)]),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(mobile ? 20 : 32, 56, mobile ? 20 : 32, 0),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1216),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primaryDeep, AppColors.primary],
+              ),
+              boxShadow: Neu.raised(),
+            ),
+            child: mobile
+                ? Column(children: items)
+                : Row(children: [for (final i in items) Expanded(child: i)]),
+          ),
+        ),
       ),
     );
   }

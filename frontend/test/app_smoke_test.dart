@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lookers/core/ui/neu.dart';
 import 'package:lookers/features/catalog/data/seed_catalog.dart';
 
 import 'helpers.dart';
@@ -12,7 +13,7 @@ void useDesktop(WidgetTester tester, {double height = 4200}) {
 }
 
 Future<void> openBag(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.shopping_bag_outlined));
+  await tester.tap(find.byIcon(Icons.shopping_bag_outlined).first);
   await tester.pumpAndSettle();
 }
 
@@ -26,7 +27,7 @@ void main() {
     expect(find.textContaining('Dressed with'), findsOneWidget);
     expect(find.textContaining('PREVIEW MODE'), findsOneWidget);
     expect(find.text('Search for items'), findsOneWidget);
-    expect(find.text('SIGN IN'), findsOneWidget);
+    expect(find.byTooltip('Sign in or sign up'), findsOneWidget);
     expect(find.text('Shop by category'), findsOneWidget);
   });
 
@@ -90,8 +91,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('COMING SOON'), findsOneWidget);
     expect(find.text('CARD PAYMENT UNAVAILABLE'), findsOneWidget);
-    final button = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'CARD PAYMENT UNAVAILABLE'),
+    final button = tester.widget<NeuButton>(
+      find.widgetWithText(NeuButton, 'CARD PAYMENT UNAVAILABLE'),
     );
     expect(button.onPressed, isNull);
   });

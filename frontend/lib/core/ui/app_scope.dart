@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../features/admin/domain/admin_repository.dart';
+import '../theme/theme_controller.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/cart/presentation/cart_controller.dart';
 import '../../features/catalog/domain/catalog_repository.dart';
@@ -21,6 +22,7 @@ class AppScope extends InheritedWidget {
     required this.admin,
     required this.auth,
     required this.cart,
+    required this.theme,
     required this.placeOrder,
     required this.isPreview,
     required super.child,
@@ -33,6 +35,7 @@ class AppScope extends InheritedWidget {
   final AdminRepository? admin;
   final AuthController auth;
   final CartController cart;
+  final ThemeController theme;
   final PlaceOrder placeOrder;
 
   /// True when Supabase isn't configured (sample catalogue, no sign-in or checkout).

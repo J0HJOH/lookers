@@ -9,15 +9,18 @@ class Logo extends StatelessWidget {
     super.key,
     this.size = 56,
     this.withWordmark = false,
-    this.color = AppColors.ink,
+    this.color,
   });
 
   final double size;
   final bool withWordmark;
-  final Color color;
+
+  /// Defaults to the active ink colour.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final color = this.color ?? AppColors.ink;
     final mark = SizedBox(
       width: size * 1.05,
       height: size,
@@ -46,7 +49,7 @@ class Logo extends StatelessWidget {
                 fontFamily: AppText.scriptFamily,
                 fontSize: size * 0.9,
                 height: 1.2,
-                color: AppColors.goldDeep,
+                color: AppColors.accent,
               ),
             ),
           ),

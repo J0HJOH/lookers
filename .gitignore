@@ -9,10 +9,6 @@ frontend/build/
 frontend/.flutter-plugins*
 frontend/.idea/
 
-# Archived Next.js version
-archive/nextjs/node_modules/
-archive/nextjs/.next/
-
 # misc
 .DS_Store
 .vercel/

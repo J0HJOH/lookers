@@ -12,6 +12,7 @@ import '../../catalog/domain/category.dart';
 import '../../catalog/domain/product.dart';
 import '../domain/product_draft.dart';
 import 'admin_shell.dart';
+import '../../../core/ui/neu.dart';
 
 class AdminProductsPage extends StatelessWidget {
   const AdminProductsPage({super.key});
@@ -27,7 +28,7 @@ class AdminProductsPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Products', style: AppText.display(40)),
-              FilledButton(
+              NeuButton(
                 onPressed: () => context.go('/admin/products/new'),
                 child: const Text('NEW PRODUCT'),
               ),
@@ -45,9 +46,8 @@ class AdminProductsPage extends StatelessWidget {
               }
               return Column(
                 children: [
-                  const Divider(),
                   for (final p in products) ...[
-                    InkWell(
+                    NeuTapCard(
                       onTap: () => context.go('/admin/products/${p.id}'),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -104,7 +104,6 @@ class AdminProductsPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Divider(),
                   ],
                 ],
               );
@@ -295,15 +294,13 @@ class _ProductFormState extends State<_ProductForm> {
     int maxLines = 1,
     TextInputType? type,
     String? hint,
-  }) => TextField(
+  }) => NeuTextField(
     controller: c,
     maxLines: maxLines,
     keyboardType: type,
-    decoration: InputDecoration(
-      labelText: label,
-      hintText: hint,
-      errorText: _errors[key],
-    ),
+    label: label,
+    hint: hint,
+    errorText: _errors[key],
   );
 
   @override
@@ -418,7 +415,7 @@ class _ProductFormState extends State<_ProductForm> {
           const SizedBox(height: 24),
           Row(
             children: [
-              FilledButton(
+              NeuButton(
                 onPressed: _busy ? null : _save,
                 child: Text(
                   _busy
@@ -429,7 +426,7 @@ class _ProductFormState extends State<_ProductForm> {
                 ),
               ),
               const SizedBox(width: 12),
-              OutlinedButton(
+              NeuButton.secondary(
                 onPressed: () => context.go('/admin/products'),
                 child: const Text('CANCEL'),
               ),
@@ -437,7 +434,6 @@ class _ProductFormState extends State<_ProductForm> {
           ),
           if (widget.product != null) ...[
             const SizedBox(height: 48),
-            const Divider(),
             const SizedBox(height: 16),
             TextButton(
               onPressed: _delete,

@@ -24,11 +24,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   fonts:
-    - family: Cormorant
-      fonts:
-        - asset: assets/fonts/Cormorant.ttf
-        - asset: assets/fonts/Cormorant-Italic.ttf
-          style: italic
     - family: Jost
       fonts:
         - asset: assets/fonts/Jost.ttf

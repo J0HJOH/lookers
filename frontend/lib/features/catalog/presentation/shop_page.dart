@@ -10,6 +10,7 @@ import '../domain/catalog_query.dart';
 import '../domain/category.dart';
 import '../domain/product.dart';
 import 'product_card.dart';
+import '../../../core/ui/neu.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({
@@ -90,11 +91,6 @@ class _ShopPageState extends State<ShopPage> {
               ],
               const SizedBox(height: 32),
               Container(
-                decoration: const BoxDecoration(
-                  border: Border.symmetric(
-                    horizontal: BorderSide(color: AppColors.line),
-                  ),
-                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: mobile
                     ? Column(
@@ -139,32 +135,25 @@ class _ShopPageState extends State<ShopPage> {
   Widget _categoryLinks(List<Category> categories) {
     Widget link(String label, String? slug) {
       final selected = widget.categorySlug == slug;
-      return Semantics(
+      return NeuSelectable(
         selected: selected,
-        button: true,
-        child: InkWell(
-          onTap: () => _navigate(
-            category: slug,
-            search: widget.search,
-            sort: widget.sort,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              label.toUpperCase(),
-              style: AppText.button().copyWith(
-                color: selected ? AppColors.goldDeep : AppColors.inkSoft,
-                letterSpacing: 2.2,
-              ),
-            ),
-          ),
+        semanticLabel: label,
+        radius: 16,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        onTap: () =>
+            _navigate(category: slug, search: widget.search, sort: widget.sort),
+        child: Text(
+          label.toUpperCase(),
+          style: AppText.button(
+            color: selected ? AppColors.accent : AppColors.inkSoft,
+          ).copyWith(letterSpacing: 1.8),
         ),
       );
     }
 
     return Wrap(
-      spacing: 24,
-      runSpacing: 4,
+      spacing: 16,
+      runSpacing: 16,
       children: [
         link('All', null),
         for (final c in categories) link(c.name, c.slug),
@@ -175,9 +164,10 @@ class _ShopPageState extends State<ShopPage> {
   Widget _controls(bool mobile) {
     final search = SizedBox(
       width: mobile ? double.infinity : 200,
-      child: TextField(
+      child: NeuTextField(
         controller: _searchController,
-        decoration: const InputDecoration(hintText: 'Search', isDense: true),
+        hint: 'Search in this list',
+        prefixIcon: Icon(Icons.search, color: AppColors.inkMuted),
         textInputAction: TextInputAction.search,
         onSubmitted: (v) => _navigate(
           category: widget.categorySlug,
@@ -193,6 +183,9 @@ class _ShopPageState extends State<ShopPage> {
         initialValue: widget.sort,
         isDense: true,
         isExpanded: true,
+        borderRadius: BorderRadius.circular(16),
+        dropdownColor: AppColors.background,
+        iconEnabledColor: AppColors.accent,
         decoration: const InputDecoration(isDense: true),
         items: [
           for (final s in SortKey.values)

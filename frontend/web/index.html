@@ -19,7 +19,8 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Lookers: men's, women's and baby's clothing, hats, shoes and bags. Considered pieces, delivered to your door.">
-  <meta name="theme-color" content="#FAF7F1">
+  <meta name="theme-color" content="#E6E1F3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#221C37" media="(prefers-color-scheme: dark)">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -31,7 +32,10 @@
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>Lookers</title>
-  <style>html, body { background: #FAF7F1; }</style>
+  <style>
+    html, body { background: #E6E1F3; }
+    @media (prefers-color-scheme: dark) { html, body { background: #221C37; } }
+  </style>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>

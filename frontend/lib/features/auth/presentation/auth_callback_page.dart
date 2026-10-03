@@ -53,12 +53,12 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 28,
                   height: 28,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: AppColors.goldDeep,
+                    color: AppColors.accent,
                   ),
                 ),
                 const SizedBox(height: 20),

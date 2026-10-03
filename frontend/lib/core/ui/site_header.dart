@@ -8,10 +8,10 @@ import '../../features/catalog/domain/product.dart';
 import '../formatting/money.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
-import '../theme/app_theme.dart';
 import 'app_scope.dart';
 import 'layout.dart';
 import 'logo.dart';
+import 'neu.dart';
 import 'product_image.dart';
 
 /// Category navigation, shared by the header row and the mobile drawer.
@@ -25,8 +25,8 @@ const navLinks = <(String, String)>[
   ('Bags', '/shop?category=bags-accessories'),
 ];
 
-/// Announcement strip, then logo + search + account + bag, then (desktop) the category row.
-/// Layout follows the familiar fast-fashion pattern: prominent search, bag count, category rail.
+/// Announcement strip, then logo + search + account + bag + theme toggle, then (desktop) the
+/// category rail. Search is prominent and the bag shows a live count.
 class SiteHeader extends StatelessWidget {
   const SiteHeader({super.key});
 
@@ -40,20 +40,56 @@ class SiteHeader extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            color: AppColors.ink,
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primaryDeep, AppColors.primary],
+              ),
+            ),
             child: Text(
               mobile
                   ? 'FREE SHIPPING OVER \$250 · 30-DAY RETURNS'
                   : 'FREE SHIPPING ON ORDERS OVER \$250   ·   30-DAY RETURNS   ·   SIGN IN TO CHECK OUT',
               textAlign: TextAlign.center,
               style: AppText.eyebrow(
-                color: AppColors.background,
-              ).copyWith(fontSize: 10, letterSpacing: 2.4),
+                color: AppColors.onPrimary,
+              ).copyWith(fontSize: 10, letterSpacing: 2.2),
             ),
           ),
-          mobile ? const _MobileHeader() : const _DesktopHeader(),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowDark.withValues(alpha: 0.6),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: mobile ? const _MobileHeader() : const _DesktopHeader(),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Sun / moon button: flips between light and dark mode (remembered on the device).
+class ThemeToggleButton extends StatelessWidget {
+  const ThemeToggleButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppScope.of(context).theme;
+    return ListenableBuilder(
+      listenable: theme,
+      builder: (context, _) => NeuIconButton(
+        icon: theme.isDark
+            ? Icons.light_mode_outlined
+            : Icons.dark_mode_outlined,
+        tooltip: theme.isDark ? 'Switch to light mode' : 'Switch to dark mode',
+        onPressed: theme.toggle,
       ),
     );
   }
@@ -67,47 +103,12 @@ class _BagButton extends StatelessWidget {
     final cart = AppScope.of(context).cart;
     return ListenableBuilder(
       listenable: cart,
-      builder: (context, _) {
-        final count = cart.count;
-        return Semantics(
-          button: true,
-          label: 'Bag, $count items',
-          child: InkWell(
-            onTap: () => context.go('/cart'),
-            child: SizedBox(
-              height: AppSizes.minTouchTarget,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Badge(
-                      isLabelVisible: count > 0,
-                      label: Text('$count'),
-                      backgroundColor: AppColors.goldDeep,
-                      textColor: AppColors.paper,
-                      child: const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    if (!isMobile(context)) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        'BAG',
-                        style: AppText.button().copyWith(
-                          color: AppColors.ink,
-                          letterSpacing: 2.2,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+      builder: (context, _) => NeuIconButton(
+        icon: Icons.shopping_bag_outlined,
+        tooltip: 'Bag, ${cart.count} items',
+        badge: cart.count,
+        onPressed: () => context.go('/cart'),
+      ),
     );
   }
 }
@@ -130,37 +131,13 @@ class _AccountButton extends StatelessWidget {
                 onPressed: () => context.go('/admin'),
                 child: Text(
                   'ADMIN',
-                  style: AppText.button().copyWith(
-                    color: AppColors.goldDeep,
-                    letterSpacing: 2.2,
-                  ),
+                  style: AppText.button(color: AppColors.accent),
                 ),
               ),
-            Semantics(
-              button: true,
-              label: user == null ? 'Sign in or sign up' : 'My account',
-              child: InkWell(
-                onTap: () => context.go(user == null ? '/login' : '/account'),
-                child: SizedBox(
-                  height: AppSizes.minTouchTarget,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.person_outline, color: AppColors.ink),
-                        const SizedBox(width: 8),
-                        Text(
-                          user == null ? 'SIGN IN' : 'ACCOUNT',
-                          style: AppText.button().copyWith(
-                            color: AppColors.ink,
-                            letterSpacing: 2.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            NeuIconButton(
+              icon: Icons.person_outline,
+              tooltip: user == null ? 'Sign in or sign up' : 'My account',
+              onPressed: () => context.go(user == null ? '/login' : '/account'),
             ),
           ],
         );
@@ -178,7 +155,7 @@ class _DesktopHeader extends StatelessWidget {
       children: [
         PageContainer(
           child: SizedBox(
-            height: 84,
+            height: 88,
             child: Row(
               children: [
                 Semantics(
@@ -200,34 +177,32 @@ class _DesktopHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 24),
                 const _AccountButton(),
+                const SizedBox(width: 12),
                 const _BagButton(),
+                const SizedBox(width: 12),
+                const ThemeToggleButton(),
               ],
             ),
           ),
         ),
-        Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: AppColors.line),
-              bottom: BorderSide(color: AppColors.line),
-            ),
-          ),
-          child: PageContainer(
-            child: Row(
-              children: [
-                for (final l in navLinks)
-                  TextButton(
+        PageContainer(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 14),
+          child: Row(
+            children: [
+              for (final l in navLinks)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: TextButton(
                     onPressed: () => context.go(l.$2),
                     child: Text(
                       l.$1.toUpperCase(),
-                      style: AppText.button().copyWith(
+                      style: AppText.button(
                         color: AppColors.ink,
-                        letterSpacing: 2.2,
-                      ),
+                      ).copyWith(letterSpacing: 2),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ],
@@ -240,56 +215,55 @@ class _MobileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.line)),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 60,
-            child: PageContainer(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Builder(
-                        builder: (context) => IconButton(
-                          tooltip: 'Menu',
-                          icon: const Icon(Icons.menu),
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                        ),
+    return Column(
+      children: [
+        SizedBox(
+          height: 68,
+          child: PageContainer(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Builder(
+                      builder: (context) => NeuIconButton(
+                        icon: Icons.menu,
+                        tooltip: 'Menu',
+                        onPressed: () => Scaffold.of(context).openDrawer(),
                       ),
                     ),
                   ),
-                  Semantics(
-                    button: true,
-                    label: 'Lookers home',
-                    child: InkWell(
-                      onTap: () => context.go('/'),
-                      child: const Logo(size: 40),
+                ),
+                Semantics(
+                  button: true,
+                  label: 'Lookers home',
+                  child: InkWell(
+                    onTap: () => context.go('/'),
+                    child: const Logo(size: 40),
+                  ),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        _AccountIcon(),
+                        SizedBox(width: 10),
+                        _BagButton(),
+                      ],
                     ),
                   ),
-                  const Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [_AccountIcon(), _BagButton()],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          const PageContainer(
-            padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: HeaderSearch(),
-          ),
-        ],
-      ),
+        ),
+        const PageContainer(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 14),
+          child: HeaderSearch(),
+        ),
+      ],
     );
   }
 }
@@ -302,9 +276,9 @@ class _AccountIcon extends StatelessWidget {
     final auth = AppScope.of(context).auth;
     return ListenableBuilder(
       listenable: auth,
-      builder: (context, _) => IconButton(
+      builder: (context, _) => NeuIconButton(
+        icon: Icons.person_outline,
         tooltip: auth.isSignedIn ? 'My account' : 'Sign in or sign up',
-        icon: const Icon(Icons.person_outline),
         onPressed: () => context.go(auth.isSignedIn ? '/account' : '/login'),
       ),
     );
@@ -369,82 +343,82 @@ class _HeaderSearchState extends State<HeaderSearch> {
         context.go('/product/${p.slug}');
       },
       fieldViewBuilder: (context, controller, focusNode, onSubmitted) =>
-          TextField(
+          NeuTextField(
             controller: controller,
             focusNode: focusNode,
+            hint: 'Search for items',
             textInputAction: TextInputAction.search,
             onSubmitted: _search,
-            style: AppText.body(color: AppColors.ink),
-            decoration: InputDecoration(
-              hintText: 'Search for items',
-              isDense: true,
-              prefixIcon: const Icon(Icons.search, color: AppColors.inkMuted),
-              suffixIcon: IconButton(
-                tooltip: 'Search',
-                icon: const Icon(Icons.arrow_forward, size: 18),
-                onPressed: () => _search(controller.text),
-              ),
+            prefixIcon: Icon(Icons.search, color: AppColors.inkMuted),
+            suffix: IconButton(
+              tooltip: 'Search',
+              icon: const Icon(Icons.arrow_forward, size: 18),
+              onPressed: () => _search(controller.text),
             ),
           ),
       optionsViewBuilder: (context, onSelected, options) => Align(
         alignment: Alignment.topLeft,
-        child: Material(
-          elevation: 4,
-          color: AppColors.paper,
-          shape: const RoundedRectangleBorder(
-            side: BorderSide(color: AppColors.line),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 10),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 620, maxHeight: 380),
-            child: ListView(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              children: [
-                for (final p in options)
-                  InkWell(
-                    onTap: () => onSelected(p),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 44,
-                            height: 58,
-                            child: ProductImage(url: p.imageUrl),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppText.body(
-                                    color: AppColors.ink,
-                                    weight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  p.categoryName,
-                                  style: AppText.body(
-                                    size: 12,
-                                    color: AppColors.inkMuted,
-                                  ),
-                                ),
-                              ],
+            constraints: const BoxConstraints(maxWidth: 620, maxHeight: 400),
+            child: NeuBox(
+              radius: 20,
+              padding: const EdgeInsets.all(8),
+              child: ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                children: [
+                  for (final p in options)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => onSelected(p),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 44,
+                              height: 56,
+                              child: ProductImage(url: p.imageUrl, radius: 10),
                             ),
-                          ),
-                          Text(
-                            formatMoney(p.priceCents),
-                            style: AppText.body(size: 14, color: AppColors.ink),
-                          ),
-                        ],
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    p.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppText.body(
+                                      color: AppColors.ink,
+                                      weight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    p.categoryName,
+                                    style: AppText.body(
+                                      size: 12,
+                                      color: AppColors.inkMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              formatMoney(p.priceCents),
+                              style: AppText.body(
+                                size: 14,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

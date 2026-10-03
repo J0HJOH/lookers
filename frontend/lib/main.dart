@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'core/theme/theme_controller.dart';
 import 'features/admin/data/supabase_admin_repository.dart';
 import 'features/auth/data/supabase_auth_repository.dart';
 import 'features/auth/presentation/auth_controller.dart';
@@ -25,6 +26,7 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final cart = CartController(SharedPrefsCartStorage(prefs));
+  final theme = ThemeController(prefs);
   final drafts = SharedPrefsCheckoutDraftStorage(prefs);
 
   if (!AppConfig.isSupabaseConfigured) {
@@ -39,6 +41,7 @@ Future<void> main() async {
         admin: null,
         auth: auth,
         cart: cart,
+        theme: theme,
         placeOrder: const PlaceOrder(orders, NoopConfirmationNotifier()),
         isPreview: true,
       ),
@@ -63,6 +66,7 @@ Future<void> main() async {
       admin: SupabaseAdminRepository(client),
       auth: auth,
       cart: cart,
+      theme: theme,
       placeOrder: PlaceOrder(orders, EdgeFunctionConfirmationNotifier(client)),
       isPreview: false,
     ),

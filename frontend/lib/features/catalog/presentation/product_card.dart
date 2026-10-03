@@ -8,6 +8,7 @@ import '../../../core/ui/layout.dart';
 import '../../../core/ui/product_image.dart';
 import '../../../core/ui/star_rating.dart';
 import '../domain/product.dart';
+import '../../../core/ui/neu.dart';
 
 class ProductCard extends StatefulWidget {
   const ProductCard({super.key, required this.product});
@@ -15,7 +16,7 @@ class ProductCard extends StatefulWidget {
   final Product product;
 
   /// Height of the text block under the 3:4 photo.
-  static const textHeight = 118.0;
+  static const textHeight = 132.0;
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -43,103 +44,110 @@ class _ProductCardState extends State<ProductCard> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => context.go('/product/${p.slug}'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 3 / 4,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ClipRect(
-                      child: AnimatedScale(
-                        scale: _hover ? 1.05 : 1,
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.easeOut,
-                        child: ProductImage(url: p.imageUrl),
-                      ),
-                    ),
-                    if (badge != null)
-                      Positioned(
-                        left: 12,
-                        top: 12,
-                        child: Container(
-                          color: AppColors.paper,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          child: Text(
-                            badge.toUpperCase(),
-                            style: AppText.eyebrow(
-                              color: AppColors.ink,
-                            ).copyWith(fontSize: 10, letterSpacing: 2),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: ProductCard.textHeight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          child: NeuBox(
+            radius: 24,
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 3 / 4,
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p.categoryName.toUpperCase(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppText.eyebrow().copyWith(
-                                letterSpacing: 2,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              p.name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppText.display(
-                                isMobile(context) ? 19 : 22,
-                              ),
-                            ),
-                            if (p.ratingCount > 0) ...[
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  StarRating(rating: p.ratingAvg, size: 14),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${p.ratingAvg.toStringAsFixed(1)} (${p.ratingCount})',
-                                    style: AppText.body(
-                                      size: 12,
-                                      color: AppColors.inkMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: AnimatedScale(
+                          scale: _hover ? 1.05 : 1,
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeOut,
+                          child: ProductImage(url: p.imageUrl),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          formatMoney(p.priceCents),
-                          style: AppText.body(size: 14, color: AppColors.ink),
+                      if (badge != null)
+                        Positioned(
+                          left: 12,
+                          top: 12,
+                          child: NeuBox(
+                            radius: 10,
+                            depth: 0.4,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            child: Text(
+                              badge.toUpperCase(),
+                              style: AppText.eyebrow(
+                                color: AppColors.ink,
+                              ).copyWith(fontSize: 10, letterSpacing: 2),
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  height: ProductCard.textHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 14, left: 4, right: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                p.categoryName.toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppText.eyebrow().copyWith(
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                p.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppText.display(
+                                  isMobile(context) ? 19 : 22,
+                                ),
+                              ),
+                              if (p.ratingCount > 0) ...[
+                                const SizedBox(height: 6),
+                                Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 6,
+                                  children: [
+                                    StarRating(rating: p.ratingAvg, size: 14),
+                                    Text(
+                                      '${p.ratingAvg.toStringAsFixed(1)} (${p.ratingCount})',
+                                      style: AppText.body(
+                                        size: 12,
+                                        color: AppColors.inkMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            formatMoney(p.priceCents),
+                            style: AppText.body(size: 14, color: AppColors.ink),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -158,7 +166,7 @@ class ProductGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = gridColumns(constraints.maxWidth);
-        const gap = 16.0;
+        const gap = 24.0;
         final cellWidth =
             (constraints.maxWidth - gap * (columns - 1)) / columns;
         return GridView.builder(
@@ -168,8 +176,9 @@ class ProductGrid extends StatelessWidget {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             crossAxisSpacing: gap,
-            mainAxisSpacing: 32,
-            mainAxisExtent: cellWidth * 4 / 3 + ProductCard.textHeight,
+            mainAxisSpacing: 28,
+            mainAxisExtent:
+                (cellWidth - 20) * 4 / 3 + ProductCard.textHeight + 20,
           ),
           itemBuilder: (context, i) => ProductCard(product: products[i]),
         );
