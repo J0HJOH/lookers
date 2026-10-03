@@ -251,6 +251,7 @@ uppercase labels, `button()`); Pinyon Script for the logo only. Variable font we
 **Shape:** rounded (cards 20-36, chips/buttons 14-16, photos 16-26). **Touch targets** ≥ 48px. **Breakpoints:**
 mobile < 700, desktop ≥ 1000. **Header pattern:** purple announcement strip, raised bar with logo, search,
 account, bag and theme toggle, category rail (desktop); on mobile the search sits under the logo row.
+**App icon:** the logo on a purple gradient, generated from the real `Logo` widget so they can't drift apart: run `cd frontend && flutter test tool/generate_icons_test.dart` (writes `web/favicon.png` and `web/icons/Icon-*.png`, including maskable versions with the mark kept inside the 80% safe zone). Re-run it if the logo or purple palette changes.
 **Logo:** `Logo` widget (cursive L over K, K in the accent purple; follows dark mode). 🟡 The owner may later
 supply final artwork; replace the widget body, keep its parameters. **Images:** free Pexels photos.
 **Product swatch colours** come from product data via `AppColors.fromHex` (the one place raw colour parsing is allowed).

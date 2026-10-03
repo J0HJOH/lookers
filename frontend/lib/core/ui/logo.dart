@@ -10,13 +10,17 @@ class Logo extends StatelessWidget {
     this.size = 56,
     this.withWordmark = false,
     this.color,
+    this.accentColor,
   });
 
   final double size;
   final bool withWordmark;
 
-  /// Defaults to the active ink colour.
+  /// Colour of the L (and wordmark). Defaults to the active ink colour.
   final Color? color;
+
+  /// Colour of the K. Defaults to the active accent purple.
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class Logo extends StatelessWidget {
                 fontFamily: AppText.scriptFamily,
                 fontSize: size * 0.9,
                 height: 1.2,
-                color: AppColors.accent,
+                color: accentColor ?? AppColors.accent,
               ),
             ),
           ),
