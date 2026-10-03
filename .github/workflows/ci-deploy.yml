@@ -1,0 +1,91 @@
+# Checks the Flutter app on every push and pull request. Pushes to main are then built and
+# deployed to Vercel production.
+#
+# Vercel can't build Flutter itself, so this workflow builds frontend/build/web and uploads just
+# that folder (Vercel only hosts the static files). Vercel's own Git deployments are off.
+#
+# Repository secrets (Settings > Secrets and variables > Actions): see docs/SETUP.md step 6.
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY
+# Optional repository variable: CURRENCY (defaults to USD).
+name: CI and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.6"
+
+jobs:
+  flutter:
+    name: Flutter checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze
+      - run: flutter test
+
+  deploy:
+    name: Build and deploy to Vercel
+    needs: [flutter]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Write build settings
+        # The Supabase URL and publishable key are public by design (RLS protects the data).
+        # Never put the Mailgun key or any service-role key here.
+        run: |
+          python3 - <<'PY'
+          import json, os
+          json.dump({
+            "SUPABASE_URL": os.environ["SUPABASE_URL"],
+            "SUPABASE_PUBLISHABLE_KEY": os.environ["SUPABASE_PUBLISHABLE_KEY"],
+            "CURRENCY": os.environ.get("CURRENCY") or "USD",
+          }, open("frontend/env.json", "w"))
+          PY
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          CURRENCY: ${{ vars.CURRENCY }}
+      - name: Build the web app
+        run: scripts/build_web.sh
+        env:
+          FLUTTER: flutter
+      - name: Deploy to Vercel (production)
+        id: deploy
+        working-directory: frontend/build/web
+        run: |
+          url=$(npx --yes vercel@latest deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url"

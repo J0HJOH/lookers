@@ -1,0 +1,37 @@
+name: lookers
+description: "Lookers storefront, customer dashboard and admin (Flutter web)."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  go_router: ^17.5.0
+  intl: ^0.20.3
+  shared_preferences: ^2.5.5
+  supabase_flutter: ^2.18.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Cormorant
+      fonts:
+        - asset: assets/fonts/Cormorant.ttf
+        - asset: assets/fonts/Cormorant-Italic.ttf
+          style: italic
+    - family: Jost
+      fonts:
+        - asset: assets/fonts/Jost.ttf
+    - family: Pinyon
+      fonts:
+        - asset: assets/fonts/PinyonScript-Regular.ttf

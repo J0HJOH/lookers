@@ -1,0 +1,12 @@
+"use client";
+
+import { useEffect } from "react";
+import { useCart } from "@/features/cart/presentation/CartProvider";
+
+export function ClearCartOnMount() {
+  const { clear, ready } = useCart();
+  useEffect(() => {
+    if (ready) clear();
+  }, [ready, clear]);
+  return null;
+}
