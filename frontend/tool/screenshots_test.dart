@@ -222,6 +222,7 @@ Future<void> _shot(
   String route, {
   required Size size,
   required bool dark,
+  Future<void> Function()? then,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -278,6 +279,7 @@ Future<void> _shot(
     EnginePhase.sendSemanticsUpdate,
     const Duration(seconds: 5),
   );
+  if (then != null) await then();
   await tester.runAsync(() async {
     final boundary =
         key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
@@ -316,6 +318,32 @@ void main() {
     addTearDown(tester.view.reset);
     await _loadFonts(tester);
     final only = Platform.environment['ONLY']?.split(',');
+    for (final signedOut in [true]) {
+      if (only != null && !only.contains('popup')) continue;
+      await _shot(
+        tester,
+        'popup-desktop-light',
+        '/',
+        size: desktop,
+        dark: false,
+        then: () async {
+          await tester.tap(find.byTooltip('My account'));
+          await tester.pumpAndSettle();
+        },
+      );
+      await _shot(
+        tester,
+        'popup-phone-dark',
+        '/',
+        size: phone,
+        dark: true,
+        then: () async {
+          await tester.tap(find.byTooltip('My account'));
+          await tester.pumpAndSettle();
+        },
+      );
+      if (!signedOut) continue;
+    }
     for (final e in routes.entries) {
       if (only != null && !only.contains(e.key)) continue;
       await _shot(

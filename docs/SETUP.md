@@ -250,7 +250,26 @@ git push -u origin main
 
 ---
 
-## 7. Mobile apps (Android and iOS)
+## 7. Synced shopping bag (real time across web and phone)
+
+While signed in, the bag lives in your Supabase database, so adding an item on the website shows up on the phone
+(and the other way round) within a moment. It uses Supabase Realtime (a WebSocket connection). Signed-out
+visitors keep a bag on their own device, which is merged into their account when they sign in.
+
+1. Run `supabase/migrations/0002_cart_sync.sql` in Supabase → SQL Editor (New query → paste → Run). It adds the
+   `cart_items` table, the safe write functions, switches on real time for it, and updates `place_order` so an order
+   also empties the bag. Run it **once**; it is a new numbered file and does not change 0001.
+2. Test it with two devices:
+   - Open the website, sign in with Google, and add a product to the bag.
+   - Run the phone app (or a simulator) signed in with the **same** Google account. The same item should be in the
+     bag. Now add another item on the phone and watch the website's bag update without reloading.
+   - Place an order on one device: the other device's bag should empty.
+3. If an item doesn't appear live: Supabase → Database → Publications → `supabase_realtime` must list
+   `cart_items`, and Project Settings → API should show Realtime enabled.
+
+---
+
+## 8. Mobile apps (Android and iOS)
 
 The same Flutter code runs as a phone app. The Android and iOS projects are in `frontend/android` and
 `frontend/ios`. Build settings come from the same `frontend/env.json` as the website.

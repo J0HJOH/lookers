@@ -45,7 +45,11 @@ large cursive **L** with a **K** beneath it (`lib/core/ui/logo.dart`).
   bag and details intact, then place the order. Only `/checkout/success`, `/account` and `/admin` are guarded.
 - **Payment screen (UI only):** "Pay on delivery" (works) and "Credit or debit card" (**Coming soon**:
   disabled placeholder fields, ordering disabled while selected). Nothing typed there is read, stored or sent.
-- **Auth:** Google sign-in via Supabase Auth (`/login`, `/auth/callback`), sign-out, route guards.
+- **Auth:** Google sign-in via Supabase Auth, sign-out, route guards. The header profile button opens a **popup**
+  (`account_dialog.dart`): signed out = sign in or sign up with Google without leaving the page; signed in = account,
+  admin and sign out. `/login` still exists as a full page, used by the route guard when a signed-out visitor opens a
+  protected URL directly.
+- **Synced bag:** signed-in shoppers' bags are shared live across web, Android and iOS (see Constraints).
 - **Customer dashboard** (`/account`, `/account/orders/:id`): order history and details.
 - **Checkout** (`/checkout`, `/checkout/success`): contact + address form, validation, atomic order
   placement through the `place_order` SQL function (prices, stock, shipping decided in the
@@ -103,8 +107,22 @@ design can be viewed. Sign-in, checkout, account and admin show "not connected" 
   shopper back to where they started (e.g. checkout).
 - **App icons** come from the logo (`scripts/make_icons.sh`): web, Android launcher + adaptive layers + launch
   splash, and the full iOS set + launch image. iOS icons must have no alpha; the script flattens them with `sips`.
-- **Cart** is stored in browser localStorage through `shared_preferences` (`lookers.cart.v1`) and is
-  treated as untrusted input when loaded. A cart line is product + size + colour.
+- **The bag has two homes.** Signed out: the device (localStorage / app storage via `shared_preferences`,
+  `lookers.cart.v1`, treated as untrusted input). Signed in: the **server** (`cart_items` table) so it follows
+  the shopper across devices **in real time**. On sign-in the device bag is merged into the account bag (then the
+  device copy is cleared); on sign-out the device bag starts empty and the account bag stays on the server.
+  A line is product + size + colour.
+- **Real-time sync (WebSocket).** `SupabaseCartRepository` opens one Supabase Realtime channel per signed-in
+  shopper (`cart:<userId>`, Postgres changes on `cart_items` filtered by `user_id`; the table is in the
+  `supabase_realtime` publication with `REPLICA IDENTITY FULL`). Any change reloads the bag (debounced 150 ms, so
+  bursts and our own echo collapse into one reload). Writes are optimistic: `CartController` updates the UI
+  instantly, then calls the `cart_add` / `cart_set_qty` / `cart_remove` / `cart_clear` functions; if the server
+  refuses, it reloads the server bag (undoing the change) and sets `syncError`. The tables are written ONLY by those
+  SQL functions (validate product, size, colour, quantity 1-10, max 30 lines); clients can only read their own rows.
+  `place_order` also empties the synced bag, so the shopper's other devices clear it the moment an order is placed.
+  Prices shown come from the product join, so they stay current; checkout still re-prices in the database.
+  `CartController` knows nothing about Supabase: it talks to the `CartRepository` contract, bound by `LookersApp`
+  when auth changes.
 - **Checkout draft** (`lookers.checkout.draft.v1`) keeps the delivery form across the sign-in round trip. It
   holds delivery details only, on the shopper's own device, and is cleared when the order is placed.
   **Card details are never collected, stored or sent**; the payment screen has no state.
@@ -540,6 +558,8 @@ currency and tax; SEO strategy (§27); anything that could lose customer or orde
 | Mobile builds | Android debug APK and iOS simulator build compile; Android is checked in CI. iOS is checked locally only (macOS runners cost more) | Release signing (Android keystore, Apple team), store listings |
 | Apple guideline 4.8 | Google is the only sign-in; Apple may reject an iPhone app that offers Google without Sign in with Apple | 🟡 Add Sign in with Apple (needs Apple Developer account + Supabase provider) |
 | Account deletion | Not built; both stores require in-app deletion for apps with accounts | Delete-my-account action (SQL function + UI) |
+| Cart sync verification | Logic is unit-tested with a simulated server and two devices; the SQL, RLS and the Realtime subscription were checked against the live project as an anonymous visitor. A full two-device test with a signed-in account has not been run by an agent | Owner runs the two-device test in docs/SETUP.md; later an automated test against a Supabase test project |
+| Cart across sign-out | Signing out leaves an empty device bag (the account bag stays on the server) | 🟡 Product decision: keep a copy on the device? |
 | Mobile polish | No splash screen branding beyond defaults, no push notifications, no biometric lock | Branded splash, order-status push |
 | Order cancel | Status change does not restock | Restock trigger |
 | Product images | Pasted URLs from allowed hosts | Supabase Storage upload + multiple images |

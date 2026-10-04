@@ -278,7 +278,7 @@ class _CategoryTile extends StatelessWidget {
                         Text(
                           category.name,
                           style: AppText.display(
-                            isMobile(context) ? 24 : 32,
+                            isMobile(context) ? 19 : 32,
                             color: AppColors.onPhoto,
                           ),
                         ),

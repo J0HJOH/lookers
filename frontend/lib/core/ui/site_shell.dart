@@ -7,6 +7,7 @@ import '../theme/app_text.dart';
 import 'app_scope.dart';
 import 'layout.dart';
 import 'logo.dart';
+import '../../features/auth/presentation/account_dialog.dart';
 import 'site_header.dart';
 
 /// Header + scrollable page + footer, shared by every route.
@@ -83,10 +84,6 @@ class _NavDrawer extends StatelessWidget {
             final items = <(String, String)>[
               ...navLinks,
               if (user?.isAdmin == true) ('Admin', '/admin'),
-              (
-                user == null ? 'Sign in' : 'Account',
-                user == null ? '/login' : '/account',
-              ),
             ];
             return ListView(
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
@@ -97,6 +94,21 @@ class _NavDrawer extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Logo(size: 52),
                   ),
+                ),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  title: Text(
+                    (user == null ? 'Sign in or sign up' : 'My account')
+                        .toUpperCase(),
+                    style: AppText.button().copyWith(color: AppColors.ink),
+                  ),
+                  onTap: () {
+                    final outer = Navigator.of(context);
+                    outer.pop();
+                    showAccountDialog(outer.context);
+                  },
                 ),
                 for (final item in items)
                   ListTile(

@@ -92,13 +92,16 @@ class _LoginPageState extends State<LoginPage> {
                 NeuButton.secondary(
                   expand: true,
                   onPressed: _busy ? null : _signIn,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.account_circle_outlined, size: 20),
-                      const SizedBox(width: 10),
-                      Text(_busy ? 'REDIRECTING…' : 'CONTINUE WITH GOOGLE'),
-                    ],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.account_circle_outlined, size: 20),
+                        const SizedBox(width: 10),
+                        Text(_busy ? 'REDIRECTING…' : 'CONTINUE WITH GOOGLE'),
+                      ],
+                    ),
                   ),
                 ),
                 if (message != null)

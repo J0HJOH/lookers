@@ -7,6 +7,7 @@ import 'core/theme/theme_controller.dart';
 import 'core/ui/app_scope.dart';
 import 'features/admin/domain/admin_repository.dart';
 import 'features/auth/presentation/auth_controller.dart';
+import 'features/cart/domain/cart_repository.dart';
 import 'features/cart/presentation/cart_controller.dart';
 import 'features/catalog/domain/catalog_repository.dart';
 import 'features/catalog/domain/review_repository.dart';
@@ -27,6 +28,7 @@ class LookersApp extends StatefulWidget {
     required this.theme,
     required this.placeOrder,
     required this.isPreview,
+    this.cartRemote,
   });
 
   final CatalogRepository catalog;
@@ -40,6 +42,9 @@ class LookersApp extends StatefulWidget {
   final PlaceOrder placeOrder;
   final bool isPreview;
 
+  /// Builds the server-side bag for a signed-in shopper (null in preview mode: the bag stays local).
+  final CartRepository Function(String userId)? cartRemote;
+
   @override
   State<LookersApp> createState() => _LookersAppState();
 }
@@ -51,6 +56,20 @@ class _LookersAppState extends State<LookersApp> {
   void initState() {
     super.initState();
     widget.auth.addListener(_returnAfterSignIn);
+    widget.auth.addListener(_syncCart);
+    _syncCart();
+  }
+
+  String? _boundUserId;
+
+  /// Signed in: the bag moves to the server and follows the shopper across devices (real time).
+  /// Signed out: back to the device bag.
+  void _syncCart() {
+    final id = widget.auth.user?.id;
+    if (id == _boundUserId) return;
+    _boundUserId = id;
+    final factory = widget.cartRemote;
+    widget.cart.bindRemote(id == null || factory == null ? null : factory(id));
   }
 
   /// After Google sign-in on a phone, bring the shopper back to the page they started from
@@ -65,6 +84,7 @@ class _LookersAppState extends State<LookersApp> {
   @override
   void dispose() {
     widget.auth.removeListener(_returnAfterSignIn);
+    widget.auth.removeListener(_syncCart);
     _router.dispose();
     super.dispose();
   }

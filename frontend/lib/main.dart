@@ -11,6 +11,7 @@ import 'features/admin/data/supabase_admin_repository.dart';
 import 'features/auth/data/supabase_auth_repository.dart';
 import 'features/auth/presentation/auth_controller.dart';
 import 'features/cart/data/cart_storage.dart';
+import 'features/cart/data/supabase_cart_repository.dart';
 import 'features/cart/presentation/cart_controller.dart';
 import 'features/catalog/data/preview_catalog_repository.dart';
 import 'features/catalog/data/preview_review_repository.dart';
@@ -71,6 +72,7 @@ Future<void> main() async {
       theme: theme,
       placeOrder: PlaceOrder(orders, EdgeFunctionConfirmationNotifier(client)),
       isPreview: false,
+      cartRemote: (userId) => SupabaseCartRepository(client, userId),
     ),
   );
 }

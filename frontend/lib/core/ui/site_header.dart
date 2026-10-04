@@ -8,6 +8,7 @@ import '../../features/catalog/domain/product.dart';
 import '../formatting/money.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import '../../features/auth/presentation/account_dialog.dart';
 import 'app_scope.dart';
 import 'layout.dart';
 import 'logo.dart';
@@ -143,7 +144,7 @@ class _AccountButton extends StatelessWidget {
             NeuIconButton(
               icon: Icons.person_outline,
               tooltip: user == null ? 'Sign in or sign up' : 'My account',
-              onPressed: () => context.go(user == null ? '/login' : '/account'),
+              onPressed: () => showAccountDialog(context),
             ),
           ],
         );
@@ -285,7 +286,7 @@ class _AccountIcon extends StatelessWidget {
       builder: (context, _) => NeuIconButton(
         icon: Icons.person_outline,
         tooltip: auth.isSignedIn ? 'My account' : 'Sign in or sign up',
-        onPressed: () => context.go(auth.isSignedIn ? '/account' : '/login'),
+        onPressed: () => showAccountDialog(context),
       ),
     );
   }
