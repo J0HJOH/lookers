@@ -41,8 +41,22 @@ class AuthController extends ChangeNotifier {
   /// False until the first auth state is known (so guarded pages don't flash a redirect).
   bool get ready => _ready;
 
-  Future<void> signInWithGoogle(String nextPath) =>
-      _repository!.signInWithGoogle(nextPath: nextPath);
+  String? _returnTo;
+
+  bool get hasReturnTo => _returnTo != null;
+
+  /// Where to go once the sign-in that was started from there completes (mobile: the browser hands
+  /// control back to the app through a deep link, which lands on the home route). Taken once.
+  String? takeReturnTo() {
+    final path = _returnTo;
+    _returnTo = null;
+    return path;
+  }
+
+  Future<void> signInWithGoogle(String nextPath) {
+    _returnTo = nextPath;
+    return _repository!.signInWithGoogle(nextPath: nextPath);
+  }
 
   Future<void> signOut() async {
     await _repository?.signOut();

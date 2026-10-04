@@ -40,7 +40,13 @@ class SiteHeader extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            // On phones the strip also covers the status bar / notch area (top inset is 0 on web).
+            padding: EdgeInsets.fromLTRB(
+              12,
+              8 + MediaQuery.paddingOf(context).top,
+              12,
+              8,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [AppColors.primaryDeep, AppColors.primary],

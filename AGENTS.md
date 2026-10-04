@@ -19,7 +19,7 @@ validation at every boundary, hand-written fakes in tests, Definition of Done, h
 ## 1. Project Context
 
 **What it is.** Lookers is an e-commerce website for a clothing brand of the same name, in a
-neumorphic purple style with dark mode. The **frontend is Flutter (web)**; the backend is **Supabase**. Logo: a
+neumorphic purple style with dark mode. The **frontend is Flutter: web, Android and iOS from one codebase**; the backend is **Supabase**. Logo: a
 large cursive **L** with a **K** beneath it (`lib/core/ui/logo.dart`).
 
 **Categories:** Men's Clothing, Women's Clothing, Baby's Clothing, Hats, Shoes, Bags & Accessories
@@ -59,7 +59,7 @@ large cursive **L** with a **K** beneath it (`lib/core/ui/logo.dart`).
 **Not implemented (do not write code or docs that assume otherwise):** online card payment, wishlist,
 writing reviews (customers can't post yet), per-colour photos and per-variant stock, discount codes, image upload (admins paste image URLs), multiple images per product,
 category management UI, restock on cancel, refunds/returns flow, shipping tracking, multi-currency,
-i18n, analytics, AI features, native iOS/Android builds, SEO for crawlers (see §27).
+i18n, analytics, AI features, store-published mobile releases (builds work; signing and store listings are owner steps), push notifications, in-app account deletion, SEO for crawlers (see §27).
 
 **Preview mode.** Built without Supabase settings, the app serves the bundled sample catalogue so the
 design can be viewed. Sign-in, checkout, account and admin show "not connected" states. Keep this working.
@@ -68,7 +68,7 @@ design can be viewed. Sign-in, checkout, account and admin show "not connected" 
 
 | Part | Technology |
 |---|---|
-| Frontend | **Flutter 3.44.6** (FVM, Dart `^3.12`), **web only**. Packages: `supabase_flutter`, `go_router`, `shared_preferences`, `intl`. Lints: `flutter_lints` + `analysis_options.yaml`. Tests: `flutter_test` + hand-written fakes |
+| Frontend | **Flutter 3.44.6** (FVM, Dart `^3.12`): **web, Android and iOS** (`frontend/android`, `frontend/ios`; app id / bundle id `com.lookers.lookers`). Packages: `supabase_flutter`, `go_router`, `shared_preferences`, `intl`. Lints: `flutter_lints` + `analysis_options.yaml`. Tests: `flutter_test` + hand-written fakes |
 | Database + Auth | **Supabase** (Postgres, RLS, Auth with Google) |
 | Server code | One **Supabase Edge Function** (Deno/TypeScript): `supabase/functions/send-order-confirmation` |
 | Email | **Mailgun** HTTP API, called only from the Edge Function |
@@ -93,6 +93,16 @@ design can be viewed. Sign-in, checkout, account and admin show "not connected" 
   `env.example.json`). Keys: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `CURRENCY`.
 - **Router:** path URLs (`usePathUrlStrategy`), so the host must rewrite every path to `index.html`.
   Dev port is fixed at **3000**: Supabase's allowed redirect URLs depend on it.
+- **One codebase, three platforms.** Don't add web-only APIs without a guard (`kIsWeb`): path URL strategy and
+  the Google redirect already branch. Phones use the same responsive layout (mobile < 700). Respect safe areas
+  (`SiteShell` uses `SafeArea` and pads the footer for the home indicator).
+- **Mobile Google sign-in** opens the system browser and returns through the deep link
+  `com.lookers.lookers://login-callback` (`AppConfig.mobileAuthRedirect`). That value must stay identical in
+  `AndroidManifest.xml` (intent-filter), `ios/Runner/Info.plist` (URL scheme) and Supabase's Redirect URLs.
+  The deep link opens the home route, so `AuthController.takeReturnTo()` + the listener in `LookersApp` send the
+  shopper back to where they started (e.g. checkout).
+- **App icons** come from the logo (`scripts/make_icons.sh`): web, Android launcher + adaptive layers + launch
+  splash, and the full iOS set + launch image. iOS icons must have no alpha; the script flattens them with `sips`.
 - **Cart** is stored in browser localStorage through `shared_preferences` (`lookers.cart.v1`) and is
   treated as untrusted input when loaded. A cart line is product + size + colour.
 - **Checkout draft** (`lookers.checkout.draft.v1`) keeps the delivery form across the sign-in round trip. It
@@ -251,7 +261,7 @@ uppercase labels, `button()`); Pinyon Script for the logo only. Variable font we
 **Shape:** rounded (cards 20-36, chips/buttons 14-16, photos 16-26). **Touch targets** ≥ 48px. **Breakpoints:**
 mobile < 700, desktop ≥ 1000. **Header pattern:** purple announcement strip, raised bar with logo, search,
 account, bag and theme toggle, category rail (desktop); on mobile the search sits under the logo row.
-**App icon:** the logo on a purple gradient, generated from the real `Logo` widget so they can't drift apart: run `cd frontend && flutter test tool/generate_icons_test.dart` (writes `web/favicon.png` and `web/icons/Icon-*.png`, including maskable versions with the mark kept inside the 80% safe zone). Re-run it if the logo or purple palette changes.
+**App icon (all platforms):** the logo on a purple gradient, generated from the real `Logo` widget so they can't drift apart: run `scripts/make_icons.sh` (writes the web, Android and iOS icons, including maskable/adaptive versions with the mark kept inside the safe zone). Re-run it if the logo or purple palette changes.
 **Logo:** `Logo` widget (cursive L over K, K in the accent purple; follows dark mode). 🟡 The owner may later
 supply final artwork; replace the widget body, keep its parameters. **Images:** free Pexels photos.
 **Product swatch colours** come from product data via `AppColors.fromHex` (the one place raw colour parsing is allowed).
@@ -527,6 +537,10 @@ currency and tax; SEO strategy (§27); anything that could lose customer or orde
 | SEO | A Flutter web app renders on a canvas: crawlers see little, no per-page titles/meta, no sitemap | 🟡 Decide: prerendered landing/product pages, or a hybrid (e.g. static pages for marketing) |
 | Security headers / CSP | None (static host config) | 🟡 Set at the host |
 | Accessibility | Semantics labels added; web semantics tree not auto-enabled | Auto-enable, audit with a screen reader |
+| Mobile builds | Android debug APK and iOS simulator build compile; Android is checked in CI. iOS is checked locally only (macOS runners cost more) | Release signing (Android keystore, Apple team), store listings |
+| Apple guideline 4.8 | Google is the only sign-in; Apple may reject an iPhone app that offers Google without Sign in with Apple | 🟡 Add Sign in with Apple (needs Apple Developer account + Supabase provider) |
+| Account deletion | Not built; both stores require in-app deletion for apps with accounts | Delete-my-account action (SQL function + UI) |
+| Mobile polish | No splash screen branding beyond defaults, no push notifications, no biometric lock | Branded splash, order-status push |
 | Order cancel | Status change does not restock | Restock trigger |
 | Product images | Pasted URLs from allowed hosts | Supabase Storage upload + multiple images |
 | Category admin | Categories only via SQL | Admin UI |

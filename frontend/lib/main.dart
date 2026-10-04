@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,8 @@ import 'features/orders/domain/place_order.dart';
 /// Composition root: the only place that chooses concrete implementations.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  usePathUrlStrategy();
+  // Path URLs (no #) only exist on the web.
+  if (kIsWeb) usePathUrlStrategy();
 
   final prefs = await SharedPreferences.getInstance();
   final cart = CartController(SharedPrefsCartStorage(prefs));

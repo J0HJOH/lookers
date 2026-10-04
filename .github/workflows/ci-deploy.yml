@@ -44,6 +44,28 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
+  android:
+    name: Android build check
+    needs: [flutter]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      # Proves the Android app compiles. Debug build, unsigned: store releases are built by the owner
+      # with their own signing key (docs/SETUP.md, mobile). iOS is checked locally (macOS runners cost more).
+      - run: flutter build apk --debug
+
   deploy:
     name: Build and deploy to Vercel
     needs: [flutter]

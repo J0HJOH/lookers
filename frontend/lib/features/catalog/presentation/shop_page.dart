@@ -151,14 +151,25 @@ class _ShopPageState extends State<ShopPage> {
       );
     }
 
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      children: [
-        link('All', null),
-        for (final c in categories) link(c.name, c.slug),
-      ],
-    );
+    final chips = [
+      link('All', null),
+      for (final c in categories) link(c.name, c.slug),
+    ];
+    if (isMobile(context)) {
+      // One swipeable row on phones instead of a tall block of wrapped chips.
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        // Room for the chips' soft shadows, which the scroll view would otherwise clip.
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+        child: Row(
+          children: [
+            for (final chip in chips)
+              Padding(padding: const EdgeInsets.only(right: 16), child: chip),
+          ],
+        ),
+      );
+    }
+    return Wrap(spacing: 16, runSpacing: 16, children: chips);
   }
 
   Widget _controls(bool mobile) {

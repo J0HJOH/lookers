@@ -48,7 +48,23 @@ class _LookersAppState extends State<LookersApp> {
   late final GoRouter _router = buildRouter(widget.auth);
 
   @override
+  void initState() {
+    super.initState();
+    widget.auth.addListener(_returnAfterSignIn);
+  }
+
+  /// After Google sign-in on a phone, bring the shopper back to the page they started from
+  /// (for example the checkout), not the home page the deep link opened.
+  void _returnAfterSignIn() {
+    if (widget.auth.isSignedIn && widget.auth.hasReturnTo) {
+      final path = widget.auth.takeReturnTo();
+      if (path != null) _router.go(path);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.auth.removeListener(_returnAfterSignIn);
     _router.dispose();
     super.dispose();
   }

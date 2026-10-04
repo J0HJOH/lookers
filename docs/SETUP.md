@@ -250,6 +250,70 @@ git push -u origin main
 
 ---
 
+## 7. Mobile apps (Android and iOS)
+
+The same Flutter code runs as a phone app. The Android and iOS projects are in `frontend/android` and
+`frontend/ios`. Build settings come from the same `frontend/env.json` as the website.
+
+### A. Run it on a simulator, emulator or your phone
+
+```bash
+cd ~/projects/lookers/frontend
+~/fvm/versions/3.44.6/bin/flutter devices                       # lists what is available
+~/fvm/versions/3.44.6/bin/flutter run -d <device> --dart-define-from-file=env.json
+```
+
+- **iPhone simulator:** open Xcode once so it finishes installing, then pick a simulator from `flutter devices`.
+- **Android emulator:** create a virtual device in Android Studio (Device Manager), start it, then run.
+- **A real phone:** plug it in (Android: enable USB debugging; iPhone: enable Developer Mode, trust the Mac,
+  and in Xcode set your Apple ID as the signing team once: open `ios/Runner.xcworkspace` → Runner → Signing).
+
+### B. Tell Supabase about the app's sign-in address (required for Google sign-in on phones)
+
+On a phone, Google sign-in opens the browser and comes back to the app through a link. Supabase must allow it:
+
+1. Supabase → **Authentication → URL Configuration → Redirect URLs → Add URL**:
+   `com.lookers.lookers://login-callback`
+2. Save. Nothing changes in Google Cloud: Google still returns to Supabase's own callback address.
+
+If you change the app id (see D), the link changes too: update `AppConfig.mobileAuthRedirect`, the Android
+`AndroidManifest.xml` intent-filter, the iOS `Info.plist` URL scheme, and this Supabase entry together.
+
+### C. Release builds you can upload to the stores
+
+```bash
+~/fvm/versions/3.44.6/bin/flutter build appbundle --release --dart-define-from-file=env.json   # Android (Play Store)
+~/fvm/versions/3.44.6/bin/flutter build ipa --release --dart-define-from-file=env.json         # iOS (App Store), needs signing
+```
+
+**Android (Google Play):**
+1. Create a Google Play Console account (one-time fee, about $25).
+2. Create an upload keystore once and keep it (and its password) safe. Losing it blocks updates:
+   `keytool -genkey -v -keystore ~/lookers-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload`
+3. Tell the agent when you have it, and it will wire up `android/key.properties` (never committed) so release
+   builds are signed.
+4. Upload the `.aab`, fill in the store listing, content rating, data-safety form and privacy-policy link.
+
+**iOS (App Store):**
+1. Join the Apple Developer Program (about $99 a year).
+2. In Xcode: `ios/Runner.xcworkspace` → Runner → Signing & Capabilities → pick your team.
+3. Create the app in App Store Connect with the same bundle id, then upload the build (Xcode Organizer or
+   Transporter) and complete the listing, privacy details and screenshots.
+
+### D. Decisions before publishing
+
+- **App id / bundle id** is `com.lookers.lookers`. Change it now if you want something else (for example one
+  matching your domain); it can't be changed after the first store release.
+- **Apple rule 4.8:** an iPhone app that offers Google sign-in must also offer an equivalent sign-in with
+  limited data collection, normally **Sign in with Apple**. Apple may reject the app without it. This needs an
+  Apple Developer account first, then a Supabase Apple provider and code. Ask the agent when you're ready.
+- **Account deletion:** Apple and Google both require that an app which lets people create an account also lets
+  them delete it from inside the app. This is not built yet.
+- **Privacy policy:** both stores need a public privacy-policy page. The one in `/policies/privacy` is a draft.
+- **Payments:** card payment isn't live. Physical goods may use an outside payment provider on both stores.
+
+---
+
 ## Decisions still open
 
 - **Dummy reviews:** the seed adds 2-3 made-up reviews per product so the page looks complete. Remove them before launch (`delete from public.reviews where is_dummy;`) or replace them with real ones; fake reviews are misleading and illegal in many countries.

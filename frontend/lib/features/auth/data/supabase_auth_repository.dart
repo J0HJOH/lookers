@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/error/failure.dart';
 import '../../catalog/data/supabase_error_mapper.dart';
 import '../domain/app_user.dart';
@@ -71,11 +73,17 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> signInWithGoogle({required String nextPath}) async {
     try {
-      final origin = Uri.base.origin;
+      // Web returns to our own /auth/callback page. On a phone the system browser returns to the
+      // app through its custom URL scheme (a deep link); supabase_flutter completes the sign-in.
+      final redirectTo = kIsWeb
+          ? '${Uri.base.origin}/auth/callback?next=${Uri.encodeQueryComponent(nextPath)}'
+          : AppConfig.mobileAuthRedirect;
       await _client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo:
-            '$origin/auth/callback?next=${Uri.encodeQueryComponent(nextPath)}',
+        redirectTo: redirectTo,
+        authScreenLaunchMode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
       );
     } catch (e) {
       final failure = mapSupabaseError(e);

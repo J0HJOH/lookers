@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
@@ -17,28 +18,42 @@ class SiteShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: isMobile(context) ? const _NavDrawer() : null,
-      body: Column(
-        children: [
-          const SiteHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              // A new key per route resets the scroll position on navigation.
-              key: ValueKey(pathKey),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 420),
-                    child: child,
+    // The purple strip at the top is dark in both modes, so the status bar icons are always light.
+    // On phones, keep the header clear of the notch / status bar.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.clear,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        drawer: isMobile(context) ? const _NavDrawer() : null,
+        // The header's purple strip draws behind the status bar itself, so no top inset here.
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Column(
+            children: [
+              const SiteHeader(),
+              Expanded(
+                child: SingleChildScrollView(
+                  // A new key per route resets the scroll position on navigation.
+                  key: ValueKey(pathKey),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 420),
+                        child: child,
+                      ),
+                      const _Footer(),
+                    ],
                   ),
-                  const _Footer(),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -206,7 +221,11 @@ class _Footer extends StatelessWidget {
           ),
           const Divider(),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
+            // Extra room under the text for the phone's home indicator / gesture bar.
+            padding: EdgeInsets.only(
+              top: 20,
+              bottom: 20 + MediaQuery.paddingOf(context).bottom,
+            ),
             child: Text(
               '© ${DateTime.now().year} LOOKERS. ALL RIGHTS RESERVED.',
               style: AppText.eyebrow().copyWith(letterSpacing: 2.4),

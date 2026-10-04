@@ -1,6 +1,7 @@
 // Generates the app icons from the real Logo widget and the bundled Pinyon Script font.
 // Run from frontend/:   flutter test tool/generate_icons_test.dart
 // Writes web/favicon.png and web/icons/Icon-*.png. It is a tool, not part of the normal test suite.
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -81,18 +82,25 @@ Future<_Bounds> _measure(WidgetTester tester) async {
 
 /// [fill] is the width of the visible mark as a fraction of the icon. Maskable icons use a smaller
 /// fill so the mark stays inside the central safe zone (the OS crops them to a circle or squircle).
-Widget _icon(double size, _Bounds b, {required double fill}) {
+Widget _icon(
+  double size,
+  _Bounds b, {
+  required double fill,
+  bool transparent = false,
+}) {
   final logoSize = size * fill / b.width;
   return SizedBox(
     width: size,
     height: size,
     child: DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Palette.light.primaryDeep, Palette.light.primary],
-        ),
+        gradient: transparent
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Palette.light.primaryDeep, Palette.light.primary],
+              ),
       ),
       child: Stack(
         children: [
@@ -117,7 +125,9 @@ Future<void> _write(
   String path,
   double size, {
   required double fill,
+  bool transparent = false,
 }) async {
+  File(path).parent.createSync(recursive: true);
   tester.view.physicalSize = Size(size, size);
   tester.view.devicePixelRatio = 1;
   final key = GlobalKey();
@@ -126,7 +136,7 @@ Future<void> _write(
       textDirection: TextDirection.ltr,
       child: RepaintBoundary(
         key: key,
-        child: _icon(size, b, fill: fill),
+        child: _icon(size, b, fill: fill, transparent: transparent),
       ),
     ),
   );
@@ -154,11 +164,109 @@ void main() {
     await tester.runAsync(font.load);
 
     final b = await _measure(tester);
+
+    // ── Web
     await _write(tester, b, 'web/icons/Icon-512.png', 512, fill: 0.76);
     await _write(tester, b, 'web/icons/Icon-192.png', 192, fill: 0.76);
     await _write(tester, b, 'web/icons/Icon-maskable-512.png', 512, fill: 0.6);
     await _write(tester, b, 'web/icons/Icon-maskable-192.png', 192, fill: 0.6);
     // Browser tab favicon: a bolder, larger mark so it stays readable at 32px.
     await _write(tester, b, 'web/favicon.png', 64, fill: 0.86);
+
+    // ── Android: legacy square icons, plus adaptive icon layers (the OS masks the icon to a circle or
+    // squircle, so the mark stays inside the central 66dp of the 108dp layer).
+    const res = 'android/app/src/main/res';
+    const legacy = {
+      'mdpi': 48.0,
+      'hdpi': 72.0,
+      'xhdpi': 96.0,
+      'xxhdpi': 144.0,
+      'xxxhdpi': 192.0,
+    };
+    for (final e in legacy.entries) {
+      await _write(
+        tester,
+        b,
+        '$res/mipmap-${e.key}/ic_launcher.png',
+        e.value,
+        fill: 0.66,
+      );
+    }
+    const layer = {
+      'mdpi': 108.0,
+      'hdpi': 162.0,
+      'xhdpi': 216.0,
+      'xxhdpi': 324.0,
+      'xxxhdpi': 432.0,
+    };
+    for (final e in layer.entries) {
+      await _write(
+        tester,
+        b,
+        '$res/drawable-${e.key}/ic_launcher_foreground.png',
+        e.value,
+        fill: 0.5,
+        transparent: true,
+      );
+    }
+    Directory('$res/mipmap-anydpi-v26').createSync(recursive: true);
+    File('$res/mipmap-anydpi-v26/ic_launcher.xml').writeAsStringSync(
+      '<?xml version="1.0" encoding="utf-8"?>\n'
+      '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+      '    <background android:drawable="@color/ic_launcher_background"/>\n'
+      '    <foreground android:drawable="@drawable/ic_launcher_foreground"/>\n'
+      '</adaptive-icon>\n',
+    );
+    final bg = Palette.light.primaryDeep;
+    final hex =
+        '#${(bg.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+    File('$res/values/ic_launcher_background.xml').writeAsStringSync(
+      '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">$hex</color>\n</resources>\n',
+    );
+
+    // ── iOS launch image (logo on the storyboard's purple background).
+    const launch = 'ios/Runner/Assets.xcassets/LaunchImage.imageset';
+    await _write(
+      tester,
+      b,
+      '$launch/LaunchImage.png',
+      168,
+      fill: 0.8,
+      transparent: true,
+    );
+    await _write(
+      tester,
+      b,
+      '$launch/LaunchImage@2x.png',
+      336,
+      fill: 0.8,
+      transparent: true,
+    );
+    await _write(
+      tester,
+      b,
+      '$launch/LaunchImage@3x.png',
+      504,
+      fill: 0.8,
+      transparent: true,
+    );
+
+    // ── iOS: every size listed in the icon set. Apple rejects icons with an alpha channel, so the
+    // PNGs are flattened afterwards (see docs: `sips` round trip).
+    const iosSet = 'ios/Runner/Assets.xcassets/AppIcon.appiconset';
+    final contents =
+        jsonDecode(File('$iosSet/Contents.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final done = <String>{};
+    for (final image
+        in (contents['images'] as List).cast<Map<String, dynamic>>()) {
+      final name = image['filename'] as String?;
+      if (name == null || !done.add(name)) continue;
+      final points = double.parse((image['size'] as String).split('x').first);
+      final scale = double.parse(
+        (image['scale'] as String).replaceAll('x', ''),
+      );
+      await _write(tester, b, '$iosSet/$name', points * scale, fill: 0.7);
+    }
   });
 }
