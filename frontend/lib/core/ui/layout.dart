@@ -27,9 +27,14 @@ class PageContainer extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Padding(
-          padding: padding ?? EdgeInsets.symmetric(horizontal: side),
-          child: child,
+        // Fill the allowed width: a Column inside would otherwise shrink to its content and
+        // sit as a narrow strip in the middle of the page.
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: padding ?? EdgeInsets.symmetric(horizontal: side),
+            child: child,
+          ),
         ),
       ),
     );

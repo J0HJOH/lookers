@@ -330,13 +330,11 @@ class _ProductFormState extends State<_ProductForm> {
           const SizedBox(height: 16),
           two(
             _text(_slug, 'Slug (URL)', 'slug', hint: 'noir-leather-jacket'),
-            DropdownButtonFormField<String>(
-              initialValue: _categoryId.isEmpty ? null : _categoryId,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: 'Category',
-                errorText: _errors['categoryId'],
-              ),
+            NeuDropdown<String>(
+              label: 'Category',
+              hint: 'Choose a category',
+              value: _categoryId.isEmpty ? null : _categoryId,
+              errorText: _errors['categoryId'],
               items: [
                 for (final c in widget.categories)
                   DropdownMenuItem(value: c.id, child: Text(c.name)),
@@ -425,7 +423,7 @@ class _ProductFormState extends State<_ProductForm> {
                             : 'SAVE CHANGES'),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 24),
               NeuButton.secondary(
                 onPressed: () => context.go('/admin/products'),
                 child: const Text('CANCEL'),

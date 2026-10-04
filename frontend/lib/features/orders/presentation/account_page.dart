@@ -80,6 +80,7 @@ class AccountPage extends StatelessWidget {
                     );
                   }
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (final o in orders) ...[
                         NeuTapCard(
@@ -169,7 +170,14 @@ class OrderDetailPage extends StatelessWidget {
           TextButton(
             onPressed: () => context.go(backTo),
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            child: Text('← $backLabel', style: AppText.eyebrow()),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.arrow_back, size: 16, color: AppColors.inkMuted),
+                const SizedBox(width: 6),
+                Text(backLabel, style: AppText.eyebrow()),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           AsyncView<Order?>(

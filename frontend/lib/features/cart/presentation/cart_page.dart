@@ -172,14 +172,13 @@ class _LineRow extends StatelessWidget {
                           ),
                         ),
                         const Spacer(),
-                        TextButton(
-                          onPressed: () => cart.remove(line),
-                          child: Text(
-                            'REMOVE',
-                            style: AppText.eyebrow().copyWith(
-                              decoration: TextDecoration.underline,
-                            ),
+                        IconButton(
+                          tooltip: 'Remove ${line.name} from the bag',
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: AppColors.inkMuted,
                           ),
+                          onPressed: () => cart.remove(line),
                         ),
                       ],
                     ),

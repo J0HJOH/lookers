@@ -7,6 +7,7 @@ import '../../../core/ui/app_scope.dart';
 import '../../../core/ui/async_view.dart';
 import '../../../core/ui/layout.dart';
 import '../domain/admin_repository.dart';
+import '../../../core/ui/neu.dart';
 
 /// Wraps every admin page with the admin navigation, and shows a message if the database
 /// isn't connected (preview mode).
@@ -34,24 +35,35 @@ class AdminShell extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 32,
-              runSpacing: 4,
+              spacing: 16,
+              runSpacing: 16,
               children: [
-                Text('Admin', style: AppText.display(30)),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Text('Admin', style: AppText.display(30)),
+                ),
                 for (final l in _links)
-                  TextButton(
-                    onPressed: () => context.go(l.$2),
+                  NeuSelectable(
+                    selected: l.$2 == '/admin'
+                        ? location == '/admin'
+                        : location.startsWith(l.$2),
+                    semanticLabel: l.$1,
+                    radius: 16,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    onTap: () => context.go(l.$2),
                     child: Text(
                       l.$1.toUpperCase(),
-                      style: AppText.button().copyWith(
-                        letterSpacing: 2.2,
+                      style: AppText.button(
                         color:
                             (l.$2 == '/admin'
                                 ? location == '/admin'
                                 : location.startsWith(l.$2))
                             ? AppColors.accent
                             : AppColors.ink,
-                      ),
+                      ).copyWith(letterSpacing: 1.8),
                     ),
                   ),
               ],

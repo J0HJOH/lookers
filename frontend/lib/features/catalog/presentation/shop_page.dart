@@ -178,24 +178,11 @@ class _ShopPageState extends State<ShopPage> {
     );
     final sort = SizedBox(
       width: mobile ? double.infinity : 210,
-      child: DropdownButtonFormField<SortKey>(
-        key: ValueKey(widget.sort),
-        initialValue: widget.sort,
-        isDense: true,
-        isExpanded: true,
-        borderRadius: BorderRadius.circular(16),
-        dropdownColor: AppColors.background,
-        iconEnabledColor: AppColors.accent,
-        decoration: const InputDecoration(isDense: true),
+      child: NeuDropdown<SortKey>(
+        value: widget.sort,
         items: [
           for (final s in SortKey.values)
-            DropdownMenuItem(
-              value: s,
-              child: Text(
-                s.label,
-                style: AppText.body(size: 14, color: AppColors.ink),
-              ),
-            ),
+            DropdownMenuItem(value: s, child: Text(s.label)),
         ],
         onChanged: (s) => _navigate(
           category: widget.categorySlug,

@@ -397,6 +397,7 @@ class _NeuTextFieldState extends State<NeuTextField> {
         ? AppColors.danger
         : (_focused ? AppColors.accent : AppColors.clear);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.label != null) ...[
@@ -492,6 +493,87 @@ class NeuTapCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A dropdown sunk into the surface, matching [NeuTextField] (label above, error below).
+class NeuDropdown<T> extends StatelessWidget {
+  const NeuDropdown({
+    super.key,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    this.label,
+    this.hint,
+    this.errorText,
+  });
+
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+  final String? label;
+  final String? hint;
+  final String? errorText;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError = errorText != null;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label != null) ...[
+          Text(
+            label!,
+            style: AppText.body(size: 13, color: AppColors.inkMuted),
+          ),
+          const SizedBox(height: 8),
+        ],
+        DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Neu.smallRadius),
+            border: Border.all(
+              color: hasError ? AppColors.danger : AppColors.clear,
+              width: 1.5,
+            ),
+          ),
+          child: NeuBox(
+            inset: true,
+            radius: Neu.smallRadius,
+            depth: 0.6,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<T>(
+                value: value,
+                isExpanded: true,
+                items: items,
+                onChanged: onChanged,
+                hint: hint == null
+                    ? null
+                    : Text(
+                        hint!,
+                        style: AppText.body(color: AppColors.inkMuted),
+                      ),
+                borderRadius: BorderRadius.circular(16),
+                dropdownColor: AppColors.background,
+                iconEnabledColor: AppColors.accent,
+                style: AppText.body(color: AppColors.ink),
+                itemHeight: 52,
+              ),
+            ),
+          ),
+        ),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: Text(
+              errorText!,
+              style: AppText.body(size: 12, color: AppColors.danger),
+            ),
+          ),
+      ],
     );
   }
 }

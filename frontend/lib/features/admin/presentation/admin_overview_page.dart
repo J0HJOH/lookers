@@ -42,25 +42,25 @@ class AdminOverviewPage extends StatelessWidget {
               for (final o in recent)
                 _Row(
                   onTap: () => context.go('/admin/orders/${o.id}'),
-                  left: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: o.orderNumber,
-                          style: AppText.body(
-                            color: AppColors.ink,
-                            weight: FontWeight.w500,
-                          ),
+                  left: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        o.orderNumber,
+                        style: AppText.body(
+                          color: AppColors.ink,
+                          weight: FontWeight.w500,
                         ),
-                        TextSpan(
-                          text: '  ${formatDate(o.createdAt)}',
-                          style: AppText.body(
-                            size: 13,
-                            color: AppColors.inkMuted,
-                          ),
+                      ),
+                      Text(
+                        formatDate(o.createdAt),
+                        style: AppText.body(
+                          size: 13,
+                          color: AppColors.inkMuted,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   right: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,11 @@ class AdminOverviewPage extends StatelessWidget {
                                   style: AppText.eyebrow(),
                                 ),
                                 const SizedBox(height: 12),
-                                Text(t.$2, style: AppText.display(40)),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(t.$2, style: AppText.display(40)),
+                                ),
                               ],
                             ),
                           ),

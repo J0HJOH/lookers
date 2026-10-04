@@ -140,7 +140,14 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
           TextButton(
             onPressed: () => context.go('/admin/orders'),
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            child: Text('← ALL ORDERS', style: AppText.eyebrow()),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.arrow_back, size: 16, color: AppColors.inkMuted),
+                const SizedBox(width: 6),
+                Text('ALL ORDERS', style: AppText.eyebrow()),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           AsyncView<Order?>(
@@ -167,12 +174,9 @@ class _AdminOrderPageState extends State<AdminOrderPage> {
                       children: [
                         SizedBox(
                           width: 220,
-                          child: DropdownButtonFormField<OrderStatus>(
-                            initialValue: _selected ?? order.status,
-                            isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Update status',
-                            ),
+                          child: NeuDropdown<OrderStatus>(
+                            label: 'Update status',
+                            value: _selected ?? order.status,
                             items: [
                               for (final s in OrderStatus.values)
                                 DropdownMenuItem(

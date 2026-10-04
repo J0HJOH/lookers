@@ -96,10 +96,16 @@ class _Distribution extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 28,
-                  child: Text(
-                    '$star ★',
-                    style: AppText.body(size: 13, color: AppColors.inkSoft),
+                  width: 40,
+                  child: Row(
+                    children: [
+                      Text(
+                        '$star',
+                        style: AppText.body(size: 13, color: AppColors.inkSoft),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(Icons.star, size: 12, color: AppColors.accent),
+                    ],
                   ),
                 ),
                 Expanded(
