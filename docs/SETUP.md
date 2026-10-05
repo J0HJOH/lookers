@@ -282,6 +282,15 @@ cd ~/projects/lookers/frontend
 ~/fvm/versions/3.44.6/bin/flutter run -d <device> --dart-define-from-file=env.json
 ```
 
+**Important: always pass `--dart-define-from-file=env.json`** (the command above does). Without it the app starts in
+*preview mode* and Google sign-in says the build has no Supabase settings. Pressing the Run button in Xcode or Android
+Studio does **not** pass it. Easiest ways to run correctly:
+- Terminal: `./scripts/run_mobile.sh` (or `./scripts/run_mobile.sh <device-id>`).
+- VS Code: open the project folder and pick **Lookers (phone or simulator, with Supabase)** in Run and Debug.
+- Android Studio: Run → Edit Configurations → your Flutter config → **Additional run args** →
+  `--dart-define-from-file=env.json`. (Xcode alone can't do this: start the app with one of the ways above.)
+- Release builds for the stores need the same flag (section C).
+
 - **iPhone simulator:** open Xcode once so it finishes installing, then pick a simulator from `flutter devices`.
 - **Android emulator:** create a virtual device in Android Studio (Device Manager), start it, then run.
 - **A real phone:** plug it in (Android: enable USB debugging; iPhone: enable Developer Mode, trust the Mac,

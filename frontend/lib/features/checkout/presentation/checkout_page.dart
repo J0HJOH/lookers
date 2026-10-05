@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
@@ -132,10 +133,7 @@ class _CheckoutFormState extends State<_CheckoutForm> {
   Future<void> _signInToContinue() async {
     final scope = AppScope.of(context);
     if (scope.isPreview) {
-      setState(
-        () => _message =
-            'Sign-in isn\'t set up yet, so orders can\'t be placed in preview mode. See docs/SETUP.md.',
-      );
+      setState(() => _message = AppConfig.missingConfigMessage);
       return;
     }
     setState(() {

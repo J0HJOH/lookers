@@ -19,6 +19,11 @@ class AppConfig {
   /// intent-filter, the iOS URL type and Supabase's Redirect URLs (docs/SETUP.md, mobile).
   static const mobileAuthRedirect = 'com.lookers.lookers://login-callback';
 
+  /// Shown wherever sign-in or checkout is attempted without Supabase settings.
+  static const missingConfigMessage =
+      'This build has no Supabase settings, so sign-in is off. Run the app with '
+      '--dart-define-from-file=env.json (see docs/SETUP.md).';
+
   /// Without Supabase settings the app runs in preview mode with the bundled sample catalogue.
   static bool get isSupabaseConfigured =>
       supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;

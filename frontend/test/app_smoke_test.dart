@@ -70,7 +70,7 @@ void main() {
 
       await tester.tap(find.text('SIGN IN TO PLACE ORDER'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('preview mode'), findsOneWidget);
+      expect(find.textContaining('no Supabase settings'), findsOneWidget);
     },
   );
 

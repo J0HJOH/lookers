@@ -258,7 +258,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('CONTINUE WITH GOOGLE'));
         await tester.pumpAndSettle();
-        expect(find.textContaining('isn\'t set up yet'), findsOneWidget);
+        expect(find.textContaining('no Supabase settings'), findsOneWidget);
       },
     );
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
@@ -27,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _signIn() async {
     final scope = AppScope.of(context);
     if (scope.isPreview) {
-      setState(() => _error = 'Sign-in isn\'t set up yet. See docs/SETUP.md.');
+      setState(() => _error = AppConfig.missingConfigMessage);
       return;
     }
     setState(() {
