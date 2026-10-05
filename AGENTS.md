@@ -100,7 +100,12 @@ design can be viewed. Sign-in, checkout, account and admin show "not connected" 
 - **One codebase, three platforms.** Don't add web-only APIs without a guard (`kIsWeb`): path URL strategy and
   the Google redirect already branch. Phones use the same responsive layout (mobile < 700). Respect safe areas
   (`SiteShell` uses `SafeArea` and pads the footer for the home indicator).
-- **Mobile Google sign-in** opens the system browser and returns through the deep link
+- **Mobile Google sign-in is native by default**: Google's account picker returns an ID token and
+  `signInWithIdToken` hands it to Supabase (`google_sign_in` package; needs `GOOGLE_WEB_CLIENT_ID`, and
+  `GOOGLE_IOS_CLIENT_ID` on iPhone; `AppConfig.shouldUseNativeGoogle`). Supabase's Google provider must list those
+  client ids and have **Skip nonce checks** on. Each signing key's SHA-1 must be registered on the Android client.
+  If the ids are missing it falls back to the browser flow below. The website always uses the browser redirect flow.
+- **Browser-flow Google sign-in** (fallback) opens the system browser and returns through the deep link
   `com.lookers.lookers://login-callback` (`AppConfig.mobileAuthRedirect`). That value must stay identical in
   `AndroidManifest.xml` (intent-filter), `ios/Runner/Info.plist` (URL scheme) and Supabase's Redirect URLs.
   The deep link opens the home route, so `AuthController.takeReturnTo()` + the listener in `LookersApp` send the

@@ -296,6 +296,24 @@ Studio does **not** pass it. Easiest ways to run correctly:
 - **A real phone:** plug it in (Android: enable USB debugging; iPhone: enable Developer Mode, trust the Mac,
   and in Xcode set your Apple ID as the signing team once: open `ios/Runner.xcworkspace` → Runner → Signing).
 
+### B0. Phone Google sign-in (the in-app account picker; no browser or website)
+
+On phones the app asks Google directly for an ID token and Supabase verifies it, so nobody is sent to your website.
+One-time setup (already done for this project; repeat only if you change the app id or signing key):
+
+1. Google Cloud → Credentials → create **OAuth client IDs**: an **Android** client (package `com.lookers.lookers` and the
+   SHA-1 of the key that signs the app), an **iOS** client (bundle id `com.lookers.lookers`), plus your existing **Web**
+   client.
+2. Put the **web** and **iOS** client ids in `frontend/env.json` as `GOOGLE_WEB_CLIENT_ID` and `GOOGLE_IOS_CLIENT_ID`
+   (public ids, not secrets). The iOS id, reversed, is also registered as a URL scheme in `ios/Runner/Info.plist`.
+3. Supabase → Authentication → Providers → Google: put the web and iOS client ids in **Authorized Client IDs**
+   (comma-separated) and turn **Skip nonce checks** on.
+4. **Each new signing key needs its SHA-1 added to the Android client.** Debug builds use the key in
+   `~/.android/debug.keystore`. When you create a release/upload key (and Google Play's app-signing key), add *their*
+   SHA-1 fingerprints to the Android client too, or sign-in fails on those builds.
+
+If the client ids are missing from `env.json`, the app falls back to the browser flow (section B below).
+
 ### B. Tell Supabase about the app's sign-in address (required for Google sign-in on phones)
 
 On a phone, Google sign-in opens the browser and comes back to the app through a link. Supabase must allow it:
