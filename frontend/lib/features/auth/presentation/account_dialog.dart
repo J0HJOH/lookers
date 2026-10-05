@@ -58,8 +58,9 @@ class _AccountDialogState extends State<_AccountDialog> {
     });
     try {
       await scope.auth.signInWithGoogle(widget.returnTo);
-      // The browser leaves for Google (web) or opens beside the app (phones); the dialog stays
-      // until sign-in completes and closes itself below.
+      // Web leaves for Google. On phones the account picker returns here: signed in (the popup
+      // closes itself below) or cancelled (the button comes back).
+      if (mounted) setState(() => _busy = false);
     } on Failure catch (f) {
       if (mounted) {
         setState(() {

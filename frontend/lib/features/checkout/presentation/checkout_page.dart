@@ -143,6 +143,7 @@ class _CheckoutFormState extends State<_CheckoutForm> {
     try {
       await scope.drafts.write(_values());
       await scope.auth.signInWithGoogle('/checkout');
+      if (mounted) setState(() => _busy = false);
     } on Failure catch (f) {
       if (mounted) {
         setState(() {

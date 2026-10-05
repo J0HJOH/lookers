@@ -37,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     });
     try {
       await scope.auth.signInWithGoogle(safeNextPath(widget.next));
+      if (mounted) setState(() => _busy = false);
     } on Failure catch (f) {
       if (mounted) {
         setState(() {

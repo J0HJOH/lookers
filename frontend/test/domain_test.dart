@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lookers/core/config/app_config.dart';
 import 'package:lookers/features/admin/domain/product_draft.dart';
 import 'package:lookers/features/auth/domain/safe_next_path.dart';
 import 'package:lookers/features/catalog/data/seed_catalog.dart';
@@ -32,6 +34,7 @@ ProductDraft draft({
 
 void main() {
   variantTests();
+  nativeGoogleTests();
   test('safeNextPath allows same-site paths and blocks open redirects', () {
     expect(safeNextPath('/checkout'), '/checkout');
     for (final bad in [
@@ -236,4 +239,35 @@ extension on ProductDraft {
         colors: colors,
         images: images,
       );
+}
+
+void nativeGoogleTests() {
+  group('phone Google sign-in mode', () {
+    bool native(
+      TargetPlatform p, {
+      String web = 'w',
+      String ios = 'i',
+      bool isWeb = false,
+    }) => AppConfig.shouldUseNativeGoogle(
+      isWeb: isWeb,
+      platform: p,
+      webClientId: web,
+      iosClientId: ios,
+    );
+
+    test('Android uses the native picker once the web client id exists', () {
+      expect(native(TargetPlatform.android, ios: ''), isTrue);
+      expect(native(TargetPlatform.android, web: ''), isFalse);
+    });
+    test(
+      'iPhone also needs the iOS client id, otherwise it falls back to the browser',
+      () {
+        expect(native(TargetPlatform.iOS), isTrue);
+        expect(native(TargetPlatform.iOS, ios: ''), isFalse);
+      },
+    );
+    test('the website always uses the redirect flow', () {
+      expect(native(TargetPlatform.android, isWeb: true), isFalse);
+    });
+  });
 }

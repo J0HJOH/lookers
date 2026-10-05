@@ -28,6 +28,17 @@
 				<string>com.lookers.lookers</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.lookers.lookers.google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Google sign-in on iPhone returns here: the iOS client id, reversed. -->
+				<string>com.googleusercontent.apps.1021877715366-ocjpou6njje3rga0aajgato79fo0sne4</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>

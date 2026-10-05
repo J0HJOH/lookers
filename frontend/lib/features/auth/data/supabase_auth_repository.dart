@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/app_config.dart';
@@ -72,6 +73,14 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInWithGoogle({required String nextPath}) async {
+    if (AppConfig.shouldUseNativeGoogle(
+      isWeb: kIsWeb,
+      platform: defaultTargetPlatform,
+      webClientId: AppConfig.googleWebClientId,
+      iosClientId: AppConfig.googleIosClientId,
+    )) {
+      return _signInWithNativeGoogle();
+    }
     try {
       // Web returns to our own /auth/callback page. On a phone the system browser returns to the
       // app through its custom URL scheme (a deep link); supabase_flutter completes the sign-in.
@@ -94,8 +103,62 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 
+  bool _googleReady = false;
+
+  /// Phone sign-in: Google's own account picker (no browser, no website), then Supabase verifies
+  /// Google's ID token. Cancelling the picker is not an error.
+  Future<void> _signInWithNativeGoogle() async {
+    try {
+      final google = GoogleSignIn.instance;
+      if (!_googleReady) {
+        await google.initialize(
+          clientId: AppConfig.googleIosClientId.isEmpty
+              ? null
+              : AppConfig.googleIosClientId,
+          serverClientId: AppConfig.googleWebClientId,
+        );
+        _googleReady = true;
+      }
+      final account = await google.authenticate();
+      final idToken = account.authentication.idToken;
+      if (idToken == null) {
+        throw const Failure(
+          FailureKind.auth,
+          'Google didn\'t return a sign-in token. Please try again.',
+        );
+      }
+      await _client.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+      );
+      // onAuthStateChange fires next, which loads the profile and updates the UI.
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted)
+        return;
+      throw const Failure(
+        FailureKind.auth,
+        'Google sign-in didn\'t complete. Please try again.',
+      );
+    } on Failure {
+      rethrow;
+    } catch (_) {
+      throw const Failure(
+        FailureKind.auth,
+        'Google sign-in didn\'t complete. Please try again.',
+      );
+    }
+  }
+
   @override
   Future<void> signOut() async {
+    if (_googleReady) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {
+        // The Supabase session is what matters; ignore a Google-side sign-out hiccup.
+      }
+    }
     await _client.auth.signOut();
   }
 
