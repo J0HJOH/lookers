@@ -25,7 +25,9 @@ class CartPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Your bag', style: AppText.display(mobile ? 44 : 56)),
-          const SizedBox(height: 32),
+          const SizedBox(height: 12),
+          const _SyncStatus(),
+          const SizedBox(height: 28),
           ListenableBuilder(
             listenable: scope.cart,
             builder: (context, _) {
@@ -313,6 +315,56 @@ class OrderSummaryCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Says where the bag lives: synced to the account (shared live with other devices) or only on this
+/// device. Also shows the reason when the last update could not reach the server.
+class _SyncStatus extends StatelessWidget {
+  const _SyncStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = AppScope.of(context);
+    return ListenableBuilder(
+      listenable: Listenable.merge([scope.cart, scope.auth]),
+      builder: (context, _) {
+        final cart = scope.cart;
+        final error = cart.syncError;
+        final signedIn = scope.auth.isSignedIn;
+        final (IconData icon, Color color, String text) = error != null
+            ? (Icons.sync_problem, AppColors.danger, error)
+            : cart.isSynced
+            ? (
+                Icons.cloud_done_outlined,
+                AppColors.success,
+                'Synced with your account. Changes appear on all your devices.',
+              )
+            : signedIn
+            ? (
+                Icons.sync,
+                AppColors.inkMuted,
+                'Connecting your bag to your account…',
+              )
+            : (
+                Icons.phone_iphone,
+                AppColors.inkMuted,
+                'Saved on this device only. Sign in to share your bag across devices.',
+              );
+        return Semantics(
+          liveRegion: true,
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(text, style: AppText.body(size: 13, color: color)),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

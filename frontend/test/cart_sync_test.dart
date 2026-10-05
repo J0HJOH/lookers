@@ -223,6 +223,23 @@ void main() {
     );
   });
 
+  group('bag sync status', () {
+    testWidgets('a signed-out shopper is told the bag is only on this device', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1280, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final app = previewApp();
+      app.cart.add(line());
+      await tester.pumpWidget(app);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.shopping_bag_outlined).first);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Saved on this device only'), findsOneWidget);
+    });
+  });
+
   group('profile popup', () {
     Future<void> openApp(WidgetTester tester, LookersApp app) async {
       tester.view.physicalSize = const Size(1280, 2400);
