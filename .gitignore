@@ -17,3 +17,6 @@ supabase/.temp/
 
 # per-machine editor settings (contain local paths)
 .vscode/settings.json
+
+# shareable test builds
+dist/
