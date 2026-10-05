@@ -14,3 +14,6 @@ frontend/.idea/
 .vercel/
 supabase/.temp/
 .vercel
+
+# per-machine editor settings (contain local paths)
+.vscode/settings.json
